@@ -1,0 +1,10 @@
+Valores de HSV:
+Azul: Hmin: 88 - HMax: 114, Smin: 140 -  SMax: 220, Vmin: 230 - Vmax: 255
+Verde: Hmin: 50 - HMax: 85, Smin: 75 -  SMax: 208, Vmin: 115 - Vmax: 160
+Amarelo: Hmin: 20 - HMax: 63, Smin: 210 -  SMax: 255, Vmin: 255 - Vmax: 255 OBS: Amarelo é bem vísivel.
+Roxo: NAO USAR POIS A LINHA ESTÁ ROXA: Hmin: 125 - HMax: 165, Smin: 78 -  SMax: 160, Vmin: 132 - Vmax: 236
+Vermelho: Hmin: 0 - HMax: 12 , Smin: 200 -  SMax: 255, Vmin: 255 - Vmax: 255: ficou bom
+Laranja (bola): Hmin: 14 - HMax: 23, Smin: 210 -  SMax: 255, Vmin: 255 - Vmax: 25
+Marrom: Hmin: 0 - HMax: 20, Smin: 130 -  SMax: 200, Vmin: 154 - Vmax: 201
+
+Dica: Todos deram bom menos o roxo. Supomos que vermelho seja o melhor.
