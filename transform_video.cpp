@@ -10,6 +10,7 @@ using namespace std;
 
 void find_border(Point2f &p, int x, int y, int dx, int dy, const Mat &img)
 {
+    int counter = 0;
     while(!img.at<uchar>(y,x) )
     {
         x += dx, y += dy;
@@ -23,6 +24,8 @@ void find_border(Point2f &p, int x, int y, int dx, int dy, const Mat &img)
 
             dx *= -1, dy *= -1;
         }
+        if(++counter > 100000)
+            break;
     }
     p = Point2f(x, y);
 }
