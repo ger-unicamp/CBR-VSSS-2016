@@ -4,6 +4,8 @@ all:
 	g++ -o transform transform.cpp $(CFLAGS) 
 	g++ -o show_image show_image.cpp $(CFLAGS) 
 	g++ -o video_cap video_cap.cpp $(CFLAGS) 
+	g++ -o find_color find_color.cpp $(CFLAGS) 
+	g++ -o transform_video transform_video.cpp $(CFLAGS) 
 
 transform:
 	g++ -o transform transform.cpp $(CFLAGS) 

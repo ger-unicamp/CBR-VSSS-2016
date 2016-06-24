@@ -32,7 +32,7 @@ int main( int argc, char** argv )
     split(imagem_hsv, channelHSV);
 
 
-    namedWindow( "Control", WINDOW_AUTOSIZE );
+/*    namedWindow( "Control", WINDOW_AUTOSIZE );
     createTrackbar("threshold", "Control", &threshold, 200);
     createTrackbar("thresholdProp", "Control", &thresholdProp, 1);
     createTrackbar("apertureSize", "Control", &apertureSize, 5);
@@ -62,8 +62,8 @@ int main( int argc, char** argv )
         imshow( "Display window 2", imagem_contours);                   // Show our image inside it.
         waitKey(0);                                          // Wait for a keystroke in the window
    }
-
-/*    namedWindow( "Display window 0", WINDOW_AUTOSIZE );// Create a window for display.
+*/
+    namedWindow( "Display window 0", WINDOW_AUTOSIZE );// Create a window for display.
     imshow( "Display window 0", channelHSV[0]);                   // Show our image inside it.
 
     namedWindow( "Display window 1", WINDOW_AUTOSIZE );// Create a window for display.
@@ -71,7 +71,7 @@ int main( int argc, char** argv )
 
     namedWindow( "Display window 2", WINDOW_AUTOSIZE );// Create a window for display.
     imshow( "Display window 2", channelHSV[2]);                   // Show our image inside it.
-*/
+
 
     waitKey(0);                                          // Wait for a keystroke in the window
     return 0;

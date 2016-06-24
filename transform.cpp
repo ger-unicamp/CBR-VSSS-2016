@@ -8,8 +8,6 @@
 using namespace cv;
 using namespace std;
 
-int sq(int x) { return x*x; } 
-
 //Input and Output Image;
 Mat input, output;
 
@@ -18,7 +16,7 @@ void find_border(Point2f &p, int x, int y, int dx, int dy, const Mat &img)
     while(!img.at<uchar>(y,x) )
     {
     circle(input, Point(x,y), 1, (0,255,0), -1);
-        printf("%d %d\n", x, y);
+ //       printf("%d %d\n", x, y);
         x += dx, y += dy;
         if(x < 0 || x >= img.cols || y < 0 || y >= img.rows)
         {
@@ -31,11 +29,11 @@ void find_border(Point2f &p, int x, int y, int dx, int dy, const Mat &img)
             dx *= -1, dy *= -1;
         }
     }
-    printf("%d\n", (int) img.at<uchar>(y,x));
+//    printf("%d\n", (int) img.at<uchar>(y,x));
     p = Point2f(x, y);
 }
 
-int main( )
+int main(int argc, char *argv[])
 {
     // Input Quadilateral or Image plane coordinates
     int threshold = 100;
@@ -50,8 +48,13 @@ int main( )
     // Lambda Matrix
     Mat lambda( 2, 4, CV_32FC1 );
      
+    if(argc != 2)
+    {
+        printf("Informe o nome da imagem\n");
+        return 1;
+    }
     //Load the image
-    input = imread( "Imagens/campo_bonito_2.png", 1 );
+    input = imread(argv[1], 1 );
     // Set the lambda matrix the same type and size as input
     lambda = Mat::zeros( input.rows, input.cols, input.type() );
 
@@ -65,7 +68,7 @@ int main( )
  
 
     Mat imagemBranco;
-    inRange(imagem_hsv, Scalar(0, 0, 150), Scalar(255, 50, 230), imagemBranco);    //Display input and output
+    inRange(imagem_hsv, Scalar(0, 0, 150), Scalar(180, 50, 230), imagemBranco);    //
 
 
   /// Apply the erosion operation
@@ -108,9 +111,17 @@ int main( )
     // Apply the Perspective Transform just found to the src image
     warpPerspective(input,output,lambda,output.size() );
 
+    vector<int> compression_params;
+    compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+    compression_params.push_back(9);
+
+    imwrite("Imagens/campo_transformado_tmp.png", output, compression_params);
+
     imshow("White",imagemBranco);
     imshow("Input",input);
     imshow("Output", output);
+
+
  
     waitKey(0);
     return 0;
