@@ -58,7 +58,7 @@ Mat transform(Mat input)
  
 
     Mat imagem_cor;
-    inRange(imagem_hsv, Scalar(0, 0, 150), Scalar(180, 50, 230), imagem_cor);    //
+    inRange(imagem_hsv, Scalar(0, 0, 164), Scalar(190, 125, 255), imagem_cor);    //
 
 
   /// Apply the erosion operation
