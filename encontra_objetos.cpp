@@ -111,9 +111,16 @@ Mat transform(Mat input)
     return output;
 }
 
+struct cor_range{
+    int hmin, hmax, smin, smax, vmin, vmax;
+    cor_range(){}
+    cor_range(int x1, int x2, int x3, int x4, int x5, int x6) : hmin(x1), hmax(x2), smin(x3), smax(x4), vmin(x5), vmax(x6) {}
+};
+
+
 int hmin = 0, hmax = 0, smin = 0, smax = 0, vmin= 0, vmax = 0;
 
-Mat find_color(const Mat &input)
+Mat find_color(const Mat &input, cor_range cor)
 {
     Mat imagem_hsv = Mat::zeros(input.size(), CV_8UC3);
     cvtColor(input, imagem_hsv, COLOR_BGR2HSV);
@@ -122,7 +129,7 @@ Mat find_color(const Mat &input)
     split(imagem_hsv, channelHSV);
 
     Mat imagem_cor;
-    inRange(imagem_hsv, Scalar(hmin, smin, vmin), Scalar(hmax, smax, vmax), imagem_cor);    //
+    inRange(imagem_hsv, Scalar(cor.hmin, cor.smin, cor.vmin), Scalar(cor.hmax, cor.smax, cor.vmax), imagem_cor);    //
 
 
     /// Apply the erosion operation
@@ -158,13 +165,14 @@ int main(int argc, char* argv[])
 
     cout << "Frame size : " << dWidth << " x " << dHeight << endl;
 
-    namedWindow( "Control", WINDOW_AUTOSIZE );
+/*    namedWindow( "Control", WINDOW_AUTOSIZE );
     createTrackbar("Hmin", "Control", &hmin, 360);
     createTrackbar("Hmax", "Control", &hmax, 360);
     createTrackbar("Smin", "Control", &smin, 255);
     createTrackbar("Smax", "Control", &smax, 255);
     createTrackbar("Vmin", "Control", &vmin, 255);
-    createTrackbar("Vmax", "Control", &vmax, 255);
+    createTrackbar("Vmax", "Control", &vmax, 255);*/
+    cor_range cor_bola(5, 42, 190, 255, 245, 255);
 
     while (1)
     {
@@ -178,7 +186,7 @@ int main(int argc, char* argv[])
              break;
         }
 
-        Mat cor = find_color(frame);
+        Mat cor = find_color(frame, cor_bola);
 
         vector<vector<Point> > contours;
         vector<Vec4i> hierarchy;
@@ -192,6 +200,14 @@ int main(int argc, char* argv[])
             drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
         }
 
+        if(contours.size())
+        {
+            Point2f centro(0,0);
+            float raio;
+            minEnclosingCircle(contours[0], centro, raio);
+            circle(drawing, centro, 5, (255,255,255), -1);
+            printf("%lf %lf\n", centro.x, centro.y);
+        }
         imshow("MyVideo_Original", frame); //show the frame in "MyVideo" window
         imshow("MyVideo_Cores", cor); //show the frame in "MyVideo" window
         imshow("MyVideo_Cores", drawing); //show the frame in "MyVideo" window
