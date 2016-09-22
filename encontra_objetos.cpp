@@ -173,6 +173,8 @@ int main(int argc, char* argv[])
     createTrackbar("Vmin", "Control", &vmin, 255);
     createTrackbar("Vmax", "Control", &vmax, 255);*/
     cor_range cor_bola(5, 42, 190, 255, 245, 255);
+    cor_range azul(87, 125, 137, 255, 196, 255);
+    cor_range amarelo(0, 80, 0, 170, 242, 255);
 
     while (1)
     {
@@ -186,7 +188,7 @@ int main(int argc, char* argv[])
              break;
         }
 
-        Mat cor = find_color(frame, cor_bola);
+        Mat cor = find_color(frame, amarelo);
 
         vector<vector<Point> > contours;
         vector<Vec4i> hierarchy;
@@ -200,14 +202,15 @@ int main(int argc, char* argv[])
             drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
         }
 
-        if(contours.size())
+        for(int i = 0; i < contours.size(); i++)
         {
             Point2f centro(0,0);
             float raio;
-            minEnclosingCircle(contours[0], centro, raio);
-            circle(drawing, centro, 5, (255,255,255), -1);
+            minEnclosingCircle(contours[i], centro, raio);
+            circle(drawing, centro, 5, Scalar(0,255,255), -1);
             printf("%lf %lf\n", centro.x, centro.y);
         }
+        printf("\n\n");
         imshow("MyVideo_Original", frame); //show the frame in "MyVideo" window
         imshow("MyVideo_Cores", cor); //show the frame in "MyVideo" window
         imshow("MyVideo_Cores", drawing); //show the frame in "MyVideo" window
