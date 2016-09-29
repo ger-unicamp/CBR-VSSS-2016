@@ -236,6 +236,8 @@ int main(int argc, char* argv[])
         for(int i = 0; i < circulos_verdes.size(); i++)
             printf("%.1lf %.1lf %.1f\n", circulos_verdes[i].first.x, circulos_verdes[i].first.y, circulos_verdes[i].second);
 
+// A distancia entre o centro do amarelo e o centro do verde deve ser menor que 22
+
         imshow("MyVideo_transformado", tratado); //show the frame in "MyVideo" window
 //        imshow("MyVideo_Cores", cor); //show the frame in "MyVideo" window
 //        imshow("MyVideo_Cores", drawing); //show the frame in "MyVideo" window
