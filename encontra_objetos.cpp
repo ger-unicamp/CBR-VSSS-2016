@@ -145,6 +145,38 @@ Mat find_color(const Mat &input, cor_range cor)
     return imagem_cor;
 }
 
+typedef pair<Point2f, float> circulo;
+
+void encontra_circulos(Mat imagem, cor_range cor_procurada, vector<circulo> &res)
+{
+        Mat cor = find_color(imagem, cor_procurada);
+
+        vector<vector<Point> > contours;
+        vector<Vec4i> hierarchy;
+        findContours( cor, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+        /// Draw contours
+//       Mat drawing = Mat::zeros( cor.size(), CV_8UC3 );
+/*        for( int i = 0; i < contours.size(); i++ )
+        {
+            Scalar color = Scalar( 255, 255, 255 );
+            drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+        }
+*/
+        for(int i = 0; i < contours.size(); i++)
+        {
+            Point2f centro(0,0);
+            float raio;
+            minEnclosingCircle(contours[i], centro, raio);
+//            circle(drawing, centro, 5, Scalar(0,255,255), -1);
+
+            res.push_back(circulo (centro, raio));
+//            printf("%lf %lf\n", centro.x, centro.y);
+        }
+        printf("\n\n");
+
+}
+
 int main(int argc, char* argv[])
 {	
 	
@@ -174,7 +206,8 @@ int main(int argc, char* argv[])
     createTrackbar("Vmax", "Control", &vmax, 255);*/
     cor_range cor_bola(5, 42, 190, 255, 245, 255);
     cor_range azul(87, 125, 137, 255, 196, 255);
-    cor_range amarelo(0, 80, 0, 170, 242, 255);
+    cor_range amarelo(18, 51, 106, 255, 152, 255);
+    cor_range verde(36, 87, 54, 255, 71, 255);
 
     while (1)
     {
@@ -188,32 +221,24 @@ int main(int argc, char* argv[])
              break;
         }
 
-        Mat cor = find_color(frame, amarelo);
+        Mat tratado = transform(frame);
 
-        vector<vector<Point> > contours;
-        vector<Vec4i> hierarchy;
-        findContours( cor, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+        vector<circulo> circulos_amarelos, circulos_verdes;
 
-        /// Draw contours
-        Mat drawing = Mat::zeros( cor.size(), CV_8UC3 );
-        for( int i = 0; i < contours.size(); i++ )
-        {
-            Scalar color = Scalar( 255, 255, 255 );
-            drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
-        }
+        encontra_circulos(tratado, amarelo, circulos_amarelos);
+        encontra_circulos(tratado, verde, circulos_verdes);
 
-        for(int i = 0; i < contours.size(); i++)
-        {
-            Point2f centro(0,0);
-            float raio;
-            minEnclosingCircle(contours[i], centro, raio);
-            circle(drawing, centro, 5, Scalar(0,255,255), -1);
-            printf("%lf %lf\n", centro.x, centro.y);
-        }
-        printf("\n\n");
-        imshow("MyVideo_Original", frame); //show the frame in "MyVideo" window
-        imshow("MyVideo_Cores", cor); //show the frame in "MyVideo" window
-        imshow("MyVideo_Cores", drawing); //show the frame in "MyVideo" window
+        printf("\nAmarelos\n");
+        for(int i = 0; i < circulos_amarelos.size(); i++)
+            printf("%.1lf %.1lf %.1f\n", circulos_amarelos[i].first.x, circulos_amarelos[i].first.y, circulos_amarelos[i].second);
+
+        printf("\nVerdes\n");
+        for(int i = 0; i < circulos_verdes.size(); i++)
+            printf("%.1lf %.1lf %.1f\n", circulos_verdes[i].first.x, circulos_verdes[i].first.y, circulos_verdes[i].second);
+
+        imshow("MyVideo_transformado", tratado); //show the frame in "MyVideo" window
+//        imshow("MyVideo_Cores", cor); //show the frame in "MyVideo" window
+//        imshow("MyVideo_Cores", drawing); //show the frame in "MyVideo" window
 
         if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
            {
