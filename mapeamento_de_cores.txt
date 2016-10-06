@@ -8,3 +8,5 @@ Laranja (bola): Hmin: 14 - HMax: 23, Smin: 210 -  SMax: 255, Vmin: 255 - Vmax: 2
 Marrom: Hmin: 0 - HMax: 20, Smin: 130 -  SMax: 200, Vmin: 154 - Vmax: 201
 
 Dica: Todos deram bom menos o roxo. Supomos que vermelho seja o melhor.
+
+Obs.: esses valores foram medidos no lab antigo, portanto estão desatualizados.

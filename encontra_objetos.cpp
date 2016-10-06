@@ -4,6 +4,7 @@
 #include "highgui.hpp"
 #include "opencv.hpp"
 #include <iostream>
+#include <math.h>
 
 using namespace cv;
 using namespace std;
@@ -177,6 +178,12 @@ void encontra_circulos(Mat imagem, cor_range cor_procurada, vector<circulo> &res
 
 }
 
+double distancia(int x1,int y1,int x2,int y2)
+{
+	float result = sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+	return result;
+}
+
 int main(int argc, char* argv[])
 {	
 	
@@ -184,6 +191,8 @@ int main(int argc, char* argv[])
 	cout << "Você deve passar o número da câmera como parâmetro" << endl;
 	return -1;
     }
+
+
     VideoCapture cap(argv[1][0] - '0'); // Abre a camera em que o numero eh passado como argumento
 
     if (!cap.isOpened())  // if not success, exit program
@@ -228,7 +237,7 @@ int main(int argc, char* argv[])
         encontra_circulos(tratado, amarelo, circulos_amarelos);
         encontra_circulos(tratado, verde, circulos_verdes);
 
-        printf("\nAmarelos\n");
+        printf("Amarelos\n");
         for(int i = 0; i < circulos_amarelos.size(); i++)
             printf("%.1lf %.1lf %.1f\n", circulos_amarelos[i].first.x, circulos_amarelos[i].first.y, circulos_amarelos[i].second);
 
@@ -237,6 +246,21 @@ int main(int argc, char* argv[])
             printf("%.1lf %.1lf %.1f\n", circulos_verdes[i].first.x, circulos_verdes[i].first.y, circulos_verdes[i].second);
 
 // A distancia entre o centro do amarelo e o centro do verde deve ser menor que 22
+        double dist; //variavel para guardar valores de distancia
+        int x_robo, y_robo;
+        for(int i = 0; i < circulos_amarelos.size(); i++) //procura em todos os circulos amarelos
+        {
+			//se a distancia entre amarelo e verde e menor que 22
+        	if (distancia(circulos_amarelos[i].first.x,circulos_amarelos[i].first.y,circulos_verdes[i].first.x,circulos_verdes[i].first.y)<23)
+        	{
+        		x_robo = circulos_amarelos[i].first.x;
+        		y_robo = circulos_amarelos[i].first.y;
+        		printf("x_robo=%d, y_robo=%d\n",x_robo,y_robo);
+        	}
+        	else
+        		printf("x_robo=%d, y_robo=%d\n",-1,-1);
+
+        }
 
         imshow("MyVideo_transformado", tratado); //show the frame in "MyVideo" window
 //        imshow("MyVideo_Cores", cor); //show the frame in "MyVideo" window
