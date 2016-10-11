@@ -6,6 +6,6 @@ all:
 	g++ -o video_cap.exe video_cap.cpp $(CFLAGS) 
 	g++ -o find_color.exe find_color.cpp $(CFLAGS) 
 	g++ -o transform_video.exe transform_video.cpp $(CFLAGS) 
-	g++ -o encontra_objetos.exe encontra_objetos.cpp $(CFLAGS)
+	g++ -o encontra_objetos.exe ger_vsss.cpp encontra_objetos.cpp $(CFLAGS)
 clean:
 	rm -f *.exe

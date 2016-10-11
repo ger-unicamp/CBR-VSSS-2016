@@ -25,12 +25,22 @@ struct color_range{
     color_range(int x1, int x2, int x3, int x4, int x5, int x6) : hmin(x1), hmax(x2), smin(x3), smax(x4), vmin(x5), vmax(x6) {}
 };
 
+extern const color_range ball_color;
+extern const color_range blue;
+extern const color_range yellow;
+extern const color_range green;
+extern const color_range white;
+
 // returns a binary image created from "input" where a pixel is white if 
 // the input pixel belongs to the color_range given
-Mat find_color(const Mat &input, color_range cor);
+Mat find_color(const Mat input, color_range color);
 
 // returns the transformed field
 // the four corners are found from "input" and a new image is created
 Mat transform(Mat input);
+
+// finds contours with the requested color
+// and stores the minimum enclosing circle for each contour in the res vector
+void find_circles(Mat imagem, color_range color_sought, vector<Circle> &res);
 
 #endif

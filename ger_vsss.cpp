@@ -1,5 +1,10 @@
 #include "ger_vsss.hpp"
 
+const color_range ball_color(5, 42, 190, 255, 245, 255);
+const color_range blue(87, 125, 137, 255, 196, 255);
+const color_range yellow(18, 51, 106, 255, 152, 255);
+const color_range green(36, 87, 54, 255, 71, 255);
+const color_range white(0,190,0,125,164,255);
 // finds one of the vertices of the field (depending on the parameters)
 // used only by the transform function
 
@@ -26,63 +31,35 @@ void find_border(Point2f &p, int x, int y, int dx, int dy, const Mat &img)
 }
 
 static Mat lambda( 2, 4, CV_32FC1 );
-static int achou_borda = 0;
+static int found_borders = 0;
 
 Mat transform(Mat input)
 {
-    if(achou_borda < 100) // after 100 iterations, considers that the field will not move
-    {    
-        achou_borda++;
-        int threshold = 100;
-        int thresholdProp = 1;
-        int apertureSize = 1;
-        int L2gradient = true;
-
-        Point2f inputQuad[4]; 
-        // Output Quadilateral or World plane coordinates
-        Point2f outputQuad[4];
-             
+    if(found_borders < 100) // after 100 iterations, considers that the field will not move
+    {
+        found_borders++;
+ 
+		Point2f inputQuad[4]; // array containing the four corners of the field
+		Point2f outputQuad[4]; // array containing the four corners of the image            
          
         // Set the lambda matrix the same type and size as input
         lambda = Mat::zeros( input.rows, input.cols, input.type() );
 
+		// Gets the binary image of the white sections
+        Mat white_binary_image = find_color(input, white);
 
-        Mat imagem_hsv = Mat::zeros(input.size(), CV_8UC3);
-        cvtColor(input, imagem_hsv, COLOR_BGR2HSV);
+        // The 4 points that select quadilateral on the input, from top-left in clockwise order
+        // These four points are the sides of the rectangular box used as input 
+        find_border(inputQuad[0], 0, 0, -1, 1, white_binary_image);
+        find_border(inputQuad[1], input.cols - 1, 0, 1, 1, white_binary_image);
+        find_border(inputQuad[2], input.cols - 1, input.rows - 1, 1, -1, white_binary_image);
+        find_border(inputQuad[3], 0, input.rows - 1, 1, 1, white_binary_image);
 
-        vector<Mat> channelHSV;
-        split(imagem_hsv, channelHSV);
-
-     
-
-        Mat imagem_cor;
-        inRange(imagem_hsv, Scalar(0, 0, 164), Scalar(190, 125, 255), imagem_cor);    //
-
-
-      /// Apply the erosion operation
-        int erosion_size = 1;
-        erode( imagem_cor, imagem_cor, getStructuringElement( MORPH_ELLIPSE,
-                                           Size( 2*erosion_size + 1, 2*erosion_size+1 ),
-                                           Point( erosion_size, erosion_size ) ) );
-        erosion_size = 2;
-        dilate( imagem_cor, imagem_cor, getStructuringElement( MORPH_RECT,
-                                           Size( 2*erosion_size + 1, 2*erosion_size+1 ),
-                                           Point( erosion_size, erosion_size ) ) );
-
-
-        // The 4 points that select quadilateral on the input , from top-left in clockwise order
-        // These four pts are the sides of the rect box used as input 
-
-        find_border(inputQuad[0], 0, 0, -1, 1, imagem_cor);
-        find_border(inputQuad[1], input.cols - 1, 0, 1, 1, imagem_cor);
-        find_border(inputQuad[2], input.cols - 1, input.rows - 1, 1, -1, imagem_cor);
-        find_border(inputQuad[3], 0, input.rows - 1, 1, 1, imagem_cor);
-
-
-    //    inputQuad[0] = Point2f( 55,25 );
-    //    inputQuad[1] = Point2f( input.cols-60,0);
-    //    inputQuad[2] = Point2f( input.cols-45,input.rows-1);
-    //    inputQuad[3] = Point2f( 40,input.rows-20  );
+		// If needed, set manually like this:
+		//    inputQuad[0] = Point2f( 55,25 );
+		//    inputQuad[1] = Point2f( input.cols-60,0);
+		//    inputQuad[2] = Point2f( input.cols-45,input.rows-1);
+		//    inputQuad[3] = Point2f( 40,input.rows-20  );
 
         // The 4 points where the mapping is to be done , from top-left in clockwise order
         outputQuad[0] = Point2f( 0,0 );
@@ -92,67 +69,59 @@ Mat transform(Mat input)
      
         // Get the Perspective Transform Matrix i.e. lambda 
         lambda = getPerspectiveTransform( inputQuad, outputQuad );
-        // Apply the Perspective Transform just found to the src image
     }
 
     Mat output;
-    warpPerspective(input,output,lambda,output.size() );
+
+    // Apply the Perspective Transform just found to the src image
+    warpPerspective(input,output,lambda,output.size());
 
     return output;
 }
 
 
-Mat find_color(const Mat &input, cor_range cor)
+Mat find_color(const Mat input, color_range color)
 {
-    Mat imagem_hsv = Mat::zeros(input.size(), CV_8UC3);
-    cvtColor(input, imagem_hsv, COLOR_BGR2HSV);
+	// creates an HSV image from the input
+    Mat hsv_image = Mat::zeros(input.size(), CV_8UC3);
+    cvtColor(input, hsv_image, COLOR_BGR2HSV);
 
-    vector<Mat> channelHSV;
-    split(imagem_hsv, channelHSV);
+    Mat binary_image; // filters the image to a binary image with the color requested
+    inRange(hsv_image, Scalar(color.hmin, color.smin, color.vmin), Scalar(color.hmax, color.smax, color.vmax), binary_image);
 
-    Mat imagem_cor;
-    inRange(imagem_hsv, Scalar(cor.hmin, cor.smin, cor.vmin), Scalar(cor.hmax, cor.smax, cor.vmax), imagem_cor);    //
-
-
-    /// Apply the erosion operation
+    // Apply the erosion operation and then dilation. In theory, it removes small interferences from the image.
+    // Increase erosion size to remove bigger "spots"
     int erosion_size = 1;
-    erode( imagem_cor, imagem_cor, getStructuringElement( MORPH_ELLIPSE,
+    erode( binary_image, binary_image, getStructuringElement( MORPH_ELLIPSE,
                                        Size( 2*erosion_size + 1, 2*erosion_size+1 ),
                                        Point( erosion_size, erosion_size ) ) );
-    erosion_size = 2;
-    dilate( imagem_cor, imagem_cor, getStructuringElement( MORPH_RECT,
-                                       Size( 2*erosion_size + 1, 2*erosion_size+1 ),
-                                       Point( erosion_size, erosion_size ) ) );
+    int dilation_size = 2;
+    dilate( binary_image, binary_image, getStructuringElement( MORPH_RECT,
+                                       Size( 2*dilation_size + 1, 2*dilation_size+1 ),
+                                       Point( dilation_size, dilation_size ) ) );
 
-    return imagem_cor;
+    return binary_image;
 }
 
-void encontra_circulos(Mat imagem, cor_range cor_procurada, vector<circulo> &res)
+void find_circles(Mat image, color_range color_sought, vector<Circle> &res)
 {
-        Mat cor = find_color(imagem, cor_procurada);
+	// Creates binary image white the selected color
+    Mat binary_image = find_color(image, color_sought);
 
-        vector<vector<Point> > contours;
-        vector<Vec4i> hierarchy;
-        findContours( cor, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    // Finds countours and stores them in the "contours" vector
+    findContours( binary_image, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
-        /// Draw contours
-//       Mat drawing = Mat::zeros( cor.size(), CV_8UC3 );
-/*        for( int i = 0; i < contours.size(); i++ )
-        {
-            Scalar color = Scalar( 255, 255, 255 );
-            drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
-        }
-*/
-        for(int i = 0; i < contours.size(); i++)
-        {
-            Point2f centro(0,0);
-            float raio;
-            minEnclosingCircle(contours[i], centro, raio);
-//            circle(drawing, centro, 5, Scalar(0,255,255), -1);
+    for(int i = 0; i < contours.size(); i++)
+    {
+        Point2f center(0,0);
+        float radius;
+        // finds the smallest possible circle that contains the contour
+        minEnclosingCircle(contours[i], center, radius);
 
-            res.push_back(circulo (centro, raio));
-//            printf("%lf %lf\n", centro.x, centro.y);
-        }
-
+        // stores it in the output vector
+        res.push_back(Circle (center, radius));
+    }
 }
 
