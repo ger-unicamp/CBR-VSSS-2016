@@ -55,27 +55,23 @@ int main(int argc, char* argv[])
         for(int i = 0; i < yellow_circles.size(); i++)
             printf("%.1lf %.1lf %.1f\n", yellow_circles[i].center.x, yellow_circles[i].center.y, yellow_circles[i].radius);
 
-        printf("\nGreen:\n");
+        printf("Green:\n");
         for(int i = 0; i < green_circles.size(); i++)
             printf("%.1lf %.1lf %.1f\n", green_circles[i].center.x, green_circles[i].center.y, green_circles[i].radius);
 
 // A distancia entre o centro do amarelo e o centro do verde deve ser menor que 22
-/*        double dist; //variavel para guardar valores de distancia
-        int x_robo, y_robo;
         for(int i = 0; i < yellow_circles.size(); i++) //procura em todos os circulos amarelos
         {
 			//se a distancia entre amarelo e verde e menor que 22
-        	if (distancia(yellow_circles[i].center.x,yellow_circles[i].center.y,green_circles[i].center.x,green_circles[i].center.y)<23)
-        	{
-        		x_robo = yellow_circles[i].center.x;
-        		y_robo = yellow_circles[i].center.y;
-        		printf("x_robo=%d, y_robo=%d\n",x_robo,y_robo);
-        	}
-        	else
-        		printf("x_robo=%d, y_robo=%d\n",-1,-1);
-
+			for(int j = 0; j < green_circles.size(); j++)
+	        	if (point_distance(yellow_circles[i].center,green_circles[j].center) <= 22)
+	        	{
+   		     		printf("\nx_robo=%.1f, y_robo=%.1f\n",yellow_circles[i].center.x, yellow_circles[i].center.y);
+   		     		printf("robot_dir: %.1lf %.1lf\n", green_circles[j].center.x - yellow_circles[i].center.x, green_circles[j].center.y - yellow_circles[i].center.y);
+   		     		break;
+	        	}
         }
-*/
+
         imshow("MyVideo_transformed", transformed_frame); //show the frame in "MyVideo_transformed" window
 
         if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop

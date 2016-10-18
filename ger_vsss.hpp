@@ -43,4 +43,6 @@ Mat transform(Mat input);
 // and stores the minimum enclosing circle for each contour in the res vector
 void find_circles(Mat imagem, color_range color_sought, vector<Circle> &res);
 
+float point_distance(Point2f a, Point2f b);
+
 #endif

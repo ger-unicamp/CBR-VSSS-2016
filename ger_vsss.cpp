@@ -1,4 +1,5 @@
 #include "ger_vsss.hpp"
+#include <math.h>
 
 const color_range ball_color(5, 42, 190, 255, 245, 255);
 const color_range blue(87, 125, 137, 255, 196, 255);
@@ -123,5 +124,11 @@ void find_circles(Mat image, color_range color_sought, vector<Circle> &res)
         // stores it in the output vector
         res.push_back(Circle (center, radius));
     }
+}
+
+
+float point_distance(Point2f a, Point2f b)
+{
+	return sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y));
 }
 
