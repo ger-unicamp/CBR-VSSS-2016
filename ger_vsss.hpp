@@ -30,6 +30,8 @@ extern const color_range blue;
 extern const color_range yellow;
 extern const color_range green;
 extern const color_range white;
+extern const color_range purple;
+extern const color_range brown;
 
 // returns a binary image created from "input" where a pixel is white if 
 // the input pixel belongs to the color_range given
