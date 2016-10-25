@@ -46,8 +46,8 @@ int main(int argc, char* argv[])
 
         Mat transformed_frame = transform(frame);
 
-		vector<Circle> yellow_circles, green_circles, brown_circles, purple_circles;
 
+		vector<Circle> yellow_circles, green_circles, brown_circles, purple_circles;
         find_circles(transformed_frame, yellow, yellow_circles);
         find_circles(transformed_frame, green, green_circles);
         find_circles(transformed_frame, purple, purple_circles);
@@ -69,26 +69,36 @@ int main(int argc, char* argv[])
         for(int i = 0; i < brown_circles.size(); i++)
             printf("%.1lf %.1lf %.1f\n", brown_circles[i].center.x, brown_circles[i].center.y, brown_circles[i].radius);
 
+
+        color_range primary_color = yellow; // or blue // define primary color
+        color_range secondary_color[3] = {green, purple, brown}; // define secondary colors
+
+        vector<Circle> primary_circles, secondary_circles[3];
+
+        find_circles(transformed_frame, primary_color, primary_circles);
+        for(int i = 0; i < 3; i++)
+            find_circles(transformed_frame, secondary_color[i], secondary_circles[i]);
+
         // A distancia entre o centro do amarelo e o centro do verde deve ser menor que 22
-        for(int i = 0; i < yellow_circles.size(); i++) //procura em todos os circulos amarelos
+        for(int i = 0; i < primary_circles.size(); i++) // searches all primary_color circles
         {
-			//se a distancia entre amarelo e verde e menor que 22
-            int index = 0, type = 1;
+
+            int index = 0, type = 0;
             float min_dist = 1e8;
-			for(int j = 0; j < green_circles.size(); j++)
-                if (point_distance(yellow_circles[i].center,green_circles[j].center) < min_dist)
-                    index = j, type = 1;
+            for(int j = 0; j < 3; j++) // finds closeest secondary color
+                for(int k = 0; k < secondary_circles[j].size(); k++)
+                    if(point_distance(primary_circles[i].center, secondary_circles[j][k].center) < min_dist)
+                    {
+                        min_dist = point_distance(primary_circles[i].center, secondary_circles[j][k].center);
+                        index = k, type = j;
+                    }
 
-            for(int j = 0; j < purple_circles.size(); j++)
-                if (point_distance(yellow_circles[i].center,purple_circles[j].center) < point_distance(yellow_circles[i].center,purple_circles[index].center))
-                    index = j, type = 2;
+            if(yellow_circles[i].radius < 8 || min_dist > 22)
+                continue; // if the radius of the yellow circle is less than 8 or the secondary color is too far away (> 22), it is not a robot
 
-            for(int j = 0; j < brown_circles.size(); j++)
-                if (point_distance(yellow_circles[i].center,brown_circles[j].center) < point_distance(yellow_circles[i].center,brown_circles[index].center))
-                    index = j, type = 3;
+            printf("\nx_robo%d=%.1f, y_robo%d=%.1f\n", type, primary_circles[i].center.x, type, primary_circles[i].center.y);
+            printf("robo%d_dir: %.1lf %.1lf\n", type, secondary_circles[type][index].center.x - primary_circles[i].center.x, secondary_circles[type][index].center.y - primary_circles[i].center.y);
 
-            printf("\nx_robo%d=%.1f, y_robo%d=%.1f\n", type,yellow_circles[i].center.x, type, yellow_circles[i].center.y);
-            //se a distancia entre amarelo e verde e menor que 22
 /*            for(int j = 0; j < purple_circles.size(); j++)
             {
                 if (point_distance(yellow_circles[i].center,purple_circles[j].center) <= 22)
