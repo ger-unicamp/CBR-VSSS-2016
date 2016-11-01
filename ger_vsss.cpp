@@ -4,7 +4,7 @@
 const color_range ball_color(10, 20, 169, 255, 245, 255);
 const color_range blue(93, 109, 180, 255, 240, 255);
 const color_range yellow(23, 36, 160, 255, 200, 255);
-const color_range green(85, 107, 150, 255, 117, 209);
+const color_range green(50, 90, 60, 200, 200, 255);
 const color_range white(0, 190, 0, 160, 200, 255);
 const color_range red(0, 11, 160, 255, 245, 255);
 const color_range purple(125, 150, 85, 180, 247, 255);
