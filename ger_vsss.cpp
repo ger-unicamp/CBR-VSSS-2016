@@ -5,7 +5,7 @@ const color_range ball_color(5, 42, 190, 255, 245, 255);
 const color_range blue(87, 125, 137, 255, 196, 255);
 const color_range yellow(18, 51, 106, 255, 152, 255);
 const color_range green(36, 87, 54, 255, 71, 255);
-const color_range white(0, 190, 0, 125, 164, 255);
+const color_range white(0, 190, 0, 160, 200, 255);
 const color_range purple(115, 161, 85, 255, 229, 255); //ajustar os valores
 const color_range brown(0, 45, 104, 199, 118, 184); //ajustar os valores
 // finds one of the vertices of the field (depending on the parameters)
