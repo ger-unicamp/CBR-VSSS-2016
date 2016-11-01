@@ -30,6 +30,7 @@ extern const color_range blue;
 extern const color_range yellow;
 extern const color_range green;
 extern const color_range white;
+extern const color_range red;
 extern const color_range purple;
 extern const color_range brown;
 
