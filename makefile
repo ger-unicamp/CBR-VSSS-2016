@@ -8,5 +8,6 @@ all:
 	g++ -o transform_video.exe transform_video.cpp $(CFLAGS) 
 	g++ -o encontra_objetos.exe ger_vsss.cpp encontra_objetos.cpp $(CFLAGS)
 	g++ -o color_calibration.exe ger_vsss.cpp color_calibration.cpp $(CFLAGS)
+	g++ -o border_calibration.exe ger_vsss.cpp border_calibration.cpp $(CFLAGS)
 clean:
 	rm -f *.exe

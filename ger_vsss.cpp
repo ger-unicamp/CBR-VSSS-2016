@@ -36,10 +36,35 @@ void find_border(Point2f &p, int x, int y, int dx, int dy, const Mat &img)
 
 static Mat lambda( 2, 4, CV_32FC1 );
 static int found_borders = 0;
+static bool manual_override = false;
+
+void set_border_manually(Mat input, Point2f p0, Point2f p1, Point2f p2, Point2f p3)
+{
+    manual_override = true;
+
+    Point2f inputQuad[4]; // array containing the four corners of the field
+    Point2f outputQuad[4]; // array containing the four corners of the image
+
+    // The 4 points that select quadilateral on the input, from top-left in clockwise order
+    // These four points are the sides of the rectangular box used as input 
+    inputQuad[0] = p0;
+    inputQuad[1] = p1;
+    inputQuad[2] = p2;
+    inputQuad[3] = p3;
+
+    // The 4 points where the mapping is to be done , from top-left in clockwise order
+    outputQuad[0] = Point2f( 0,0 );
+    outputQuad[1] = Point2f( input.cols-1,0);
+    outputQuad[2] = Point2f( input.cols-1,input.rows-1);
+    outputQuad[3] = Point2f( 0,input.rows-1  );
+
+    // Get the Perspective Transform Matrix i.e. lambda 
+    lambda = getPerspectiveTransform( inputQuad, outputQuad );
+}
 
 Mat transform(Mat input)
 {
-    if(found_borders < 100) // after 100 iterations, considers that the field will not move
+    if(!manual_override && found_borders < 100) // after 100 iterations, considers that the field will not move
     {
         found_borders++;
  
