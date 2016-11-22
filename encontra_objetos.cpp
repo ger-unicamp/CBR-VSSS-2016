@@ -47,11 +47,11 @@ int main(int argc, char* argv[])
         Mat transformed_frame = transform(frame);
 
 
-		vector<Circle> yellow_circles, green_circles, brown_circles, purple_circles;
+		vector<Circle> yellow_circles, green_circles, red_circles, purple_circles;
         find_circles(transformed_frame, yellow, yellow_circles);
         find_circles(transformed_frame, green, green_circles);
         find_circles(transformed_frame, purple, purple_circles);
-        find_circles(transformed_frame, brown, brown_circles);
+        find_circles(transformed_frame, red, red_circles);
 
         printf("\nYellow:\n");
         for(int i = 0; i < yellow_circles.size(); i++)
@@ -65,13 +65,13 @@ int main(int argc, char* argv[])
         for(int i = 0; i < purple_circles.size(); i++)
             printf("%.1lf %.1lf %.1f\n", purple_circles[i].center.x, purple_circles[i].center.y, purple_circles[i].radius);
 
-        printf("Brown:\n");
-        for(int i = 0; i < brown_circles.size(); i++)
-            printf("%.1lf %.1lf %.1f\n", brown_circles[i].center.x, brown_circles[i].center.y, brown_circles[i].radius);
+        printf("Red:\n");
+        for(int i = 0; i < red_circles.size(); i++)
+            printf("%.1lf %.1lf %.1f\n", red_circles[i].center.x, red_circles[i].center.y, red_circles[i].radius);
 
 
         color_range primary_color = yellow; // or blue // define primary color
-        color_range secondary_color[3] = {green, purple, brown}; // define secondary colors
+        color_range secondary_color[3] = {green, purple, red}; // define secondary colors
 
         vector<Circle> primary_circles, secondary_circles[3];
 
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
                         index = k, type = j;
                     }
 
-            if(yellow_circles[i].radius < 8 || min_dist > 22)
+            if(yellow_circles[i].radius < 6 || min_dist > 22)
                 continue; // if the radius of the yellow circle is less than 8 or the secondary color is too far away (> 22), it is not a robot
 
             printf("\nx_robo%d=%.1f, y_robo%d=%.1f\n", type, primary_circles[i].center.x, type, primary_circles[i].center.y);
@@ -110,12 +110,12 @@ int main(int argc, char* argv[])
             }
 
             //se a distancia entre amarelo e verde e menor que 22
-            for(int j = 0; j < brown_circles.size(); j++)
+            for(int j = 0; j < red_circles.size(); j++)
             {
-                if (point_distance(yellow_circles[i].center,brown_circles[j].center) <= 22)
+                if (point_distance(yellow_circles[i].center,red_circles[j].center) <= 22)
                 {
                     printf("\nx_robo3=%.1f, y_robo3=%.1f\n",yellow_circles[i].center.x, yellow_circles[i].center.y);
-                    printf("robo3_dir: %.1lf %.1lf\n", brown_circles[j].center.x - yellow_circles[i].center.x, brown_circles[j].center.y - yellow_circles[i].center.y);
+                    printf("robo3_dir: %.1lf %.1lf\n", red_circles[j].center.x - yellow_circles[i].center.x, red_circles[j].center.y - yellow_circles[i].center.y);
                     break;
                 }
             }*/
