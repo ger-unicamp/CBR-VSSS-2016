@@ -16,6 +16,8 @@ struct Circle{
 	float radius;
 	Circle(){}
 	Circle(Point2f _center, float _radius) : center(_center), radius(_radius) {}
+
+	bool operator < (Circle a) const { return radius > a.radius; }
 };
 
 // color defined by minimun and maximum values of its HSV components

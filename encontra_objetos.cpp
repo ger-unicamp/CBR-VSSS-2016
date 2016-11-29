@@ -13,8 +13,8 @@ int main(int argc, char* argv[])
 {	
 	// if did not receive expected number of arguments, prints usage instructions
 	// the user must send the cam number as a parameter
-    if(argc != 2) {
-		cout << "Usage: " << argv[0] << " <cam number>" << endl;
+    if(argc != 3) {
+		cout << "Usage: " << argv[0] << " <cam number>" << " <primary_color>"<<  endl;
 		return -1;
     }
 
@@ -32,6 +32,16 @@ int main(int argc, char* argv[])
 
 	cout << "Frame size : " << dWidth << " x " << dHeight << endl; // prints image size
 
+    color_range primary_color = strcmp(argv[2], "yellow") == 0 ? yellow : blue;
+    color_range opponent_color = strcmp(argv[2], "yellow") == 0 ? blue : yellow;
+
+    printf("Primary color is: %s", strcmp(argv[2], "yellow") == 0 ? "yellow" : "blue");
+
+    color_range secondary_color[3] = {green, purple, red}; // define secondary colors
+
+
+    bool unset = true;
+
     while (1)
     {
         Mat frame;
@@ -45,36 +55,17 @@ int main(int argc, char* argv[])
         }
 
         Mat transformed_frame = transform(frame);
+    
+        if(unset)
+        {
+            set_border_manually(frame, Point2f(111,47), Point2f(566,10), Point2f(579, 415), Point2f(135, 421));
+            unset = false;
+        }
 
+        vector<Circle> primary_circles, opponent_circles, secondary_circles[3], ball_circles;
 
-		vector<Circle> yellow_circles, green_circles, red_circles, purple_circles;
-        find_circles(transformed_frame, yellow, yellow_circles);
-        find_circles(transformed_frame, green, green_circles);
-        find_circles(transformed_frame, purple, purple_circles);
-        find_circles(transformed_frame, red, red_circles);
-
-        printf("\nYellow:\n");
-        for(int i = 0; i < yellow_circles.size(); i++)
-            printf("%.1lf %.1lf %.1f\n", yellow_circles[i].center.x, yellow_circles[i].center.y, yellow_circles[i].radius);
-
-        printf("Green:\n");
-        for(int i = 0; i < green_circles.size(); i++)
-            printf("%.1lf %.1lf %.1f\n", green_circles[i].center.x, green_circles[i].center.y, green_circles[i].radius);
-
-        printf("Purple:\n");
-        for(int i = 0; i < purple_circles.size(); i++)
-            printf("%.1lf %.1lf %.1f\n", purple_circles[i].center.x, purple_circles[i].center.y, purple_circles[i].radius);
-
-        printf("Red:\n");
-        for(int i = 0; i < red_circles.size(); i++)
-            printf("%.1lf %.1lf %.1f\n", red_circles[i].center.x, red_circles[i].center.y, red_circles[i].radius);
-
-
-        color_range primary_color = yellow; // or blue // define primary color
-        color_range secondary_color[3] = {green, purple, red}; // define secondary colors
-
-        vector<Circle> primary_circles, secondary_circles[3];
-
+        find_circles(transformed_frame, ball_color, ball_circles);
+        find_circles(transformed_frame, opponent_color, opponent_circles);
         find_circles(transformed_frame, primary_color, primary_circles);
         for(int i = 0; i < 3; i++)
             find_circles(transformed_frame, secondary_color[i], secondary_circles[i]);
@@ -93,34 +84,20 @@ int main(int argc, char* argv[])
                         index = k, type = j;
                     }
 
-            if(yellow_circles[i].radius < 6 || min_dist > 22)
+            if(primary_circles[i].radius < 6 || min_dist > 22)
                 continue; // if the radius of the yellow circle is less than 8 or the secondary color is too far away (> 22), it is not a robot
 
             printf("\nx_robo%d=%.1f, y_robo%d=%.1f\n", type, primary_circles[i].center.x, type, primary_circles[i].center.y);
             printf("robo%d_dir: %.1lf %.1lf\n", type, secondary_circles[type][index].center.x - primary_circles[i].center.x, secondary_circles[type][index].center.y - primary_circles[i].center.y);
-
-/*            for(int j = 0; j < purple_circles.size(); j++)
-            {
-                if (point_distance(yellow_circles[i].center,purple_circles[j].center) <= 22)
-                {
-                    printf("\nx_robo2=%.1f, y_robo2=%.1f\n",yellow_circles[i].center.x, yellow_circles[i].center.y);
-                    printf("robo2_dir: %.1lf %.1lf\n", purple_circles[j].center.x - yellow_circles[i].center.x, purple_circles[j].center.y - yellow_circles[i].center.y);
-                    break;
-                }
-            }
-
-            //se a distancia entre amarelo e verde e menor que 22
-            for(int j = 0; j < red_circles.size(); j++)
-            {
-                if (point_distance(yellow_circles[i].center,red_circles[j].center) <= 22)
-                {
-                    printf("\nx_robo3=%.1f, y_robo3=%.1f\n",yellow_circles[i].center.x, yellow_circles[i].center.y);
-                    printf("robo3_dir: %.1lf %.1lf\n", red_circles[j].center.x - yellow_circles[i].center.x, red_circles[j].center.y - yellow_circles[i].center.y);
-                    break;
-                }
-            }*/
         }
 
+        sort(opponent_circles.begin(), opponent_circles.end());
+        for(int i = 0; i < 3 && i < opponent_circles.size(); i++)
+            printf("\nx_opponent%d=%.1f, y_opponent%d=%.1f\n", i, opponent_circles[i].center.x, i, opponent_circles[i].center.y);
+
+        sort(ball_circles.begin(), ball_circles.end());
+        if(ball_circles.size())
+            printf("\nx_ball=%.1f, y_ball=%.1f\n", ball_circles[0].center.x, ball_circles[0].center.y);
 
 
         imshow("MyVideo_transformed", transformed_frame); //show the frame in "MyVideo_transformed" window
