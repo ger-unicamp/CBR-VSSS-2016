@@ -15,7 +15,8 @@
 #define ENC_R A6
 #define ENC_L A7
 
-void configura_velocidade (int motorA, int motorB){ //Configura velocidade dos motores (para frente ou para tras) com PWM
+//Configura velocidade dos motores (para frente ou para tras) com PWM
+void configura_velocidade (int motorA, int motorB){
   if(motorA > 0){
     analogWrite(PH_IN1, motorA);
     analogWrite(PH_IN2, 0);
@@ -35,7 +36,8 @@ void configura_velocidade (int motorA, int motorB){ //Configura velocidade dos m
   }
 }
 
-void para_motores (int motorA, int motorB){ //Para os motores. Para parar o motorA, deve-se passar o parametro motorA!=0. Analogamente para motorB.
+//Para os motores. Para parar o motorA, deve-se passar o parametro motorA!=0. Analogamente para motorB.
+void para_motores (int motorA, int motorB){
   if(motorA){
     digitalWrite(PH_IN1,1);
     digitalWrite(PH_IN2,1);
@@ -46,6 +48,7 @@ void para_motores (int motorA, int motorB){ //Para os motores. Para parar o moto
   }
 }
 
+//Configura o valor para cada motor, segundo http://migre.me/wosaU
 void configura_motores (int in1, int in2, int in3, int in4){
   digitalWrite(PH_IN1, in1);
   digitalWrite(PH_IN2, in2);
@@ -53,6 +56,7 @@ void configura_motores (int in1, int in2, int in3, int in4){
   digitalWrite(PH_IN4, in4);
 }
 
+//Inicializacoes
 void setup(){
  pinMode(PH_IN1, OUTPUT);
  pinMode(PH_IN2, OUTPUT);
@@ -62,7 +66,7 @@ void setup(){
  delay(500);
  Serial.begin(9600);
  
- configura_velocidade(100,100);
+ configura_velocidade(200,200);
 }
 
 void loop(){
