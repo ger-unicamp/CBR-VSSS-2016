@@ -65,15 +65,10 @@ void setup(){
  
  delay(500);
  Serial.begin(9600);
- 
- configura_velocidade(200,200);
 }
 
 void loop(){
-  Serial.println(analogRead(ENC_R));
-  Serial.println(analogRead(ENC_L));
-  Serial.println( );
-  delay(200);
+  configura_velocidade(200,200);
   
   /*for(int i=0; i<256; i++)
   {
