@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
     color_range secondary_color[3] = {green, purple, red}; // define secondary colors
 
 
-    bool unset = true;
+    bool unset = false;
 
     while (1)
     {
@@ -89,6 +89,7 @@ int main(int argc, char* argv[])
 
             printf("\nx_robo%d=%.1f, y_robo%d=%.1f\n", type, primary_circles[i].center.x, type, primary_circles[i].center.y);
             printf("robo%d_dir: %.1lf %.1lf\n", type, secondary_circles[type][index].center.x - primary_circles[i].center.x, secondary_circles[type][index].center.y - primary_circles[i].center.y);
+            printf("robo%d_dir: %.1lf\n", type, (M_PI + atan2(secondary_circles[type][index].center.y - primary_circles[i].center.y, secondary_circles[type][index].center.x - primary_circles[i].center.x)) * (180/M_PI));
         }
 
         sort(opponent_circles.begin(), opponent_circles.end());
