@@ -19,10 +19,18 @@
 #define ENC_E A7
 
 //Limites inferior e superior para comparacao dos encoders
+/*
 #define limsup_dir 853
 #define limsup_esq 823
 #define liminf_dir 700//676
 #define liminf_esq 542
+*/
+
+//Variaveis globais de leitura de encoder
+int limsup_dir = 0;
+int limsup_esq = 0;
+int liminf_dir = 1024;
+int liminf_esq = 1024;
 
 //Variaveis globais
 volatile boolean estado_direita = false;
@@ -71,24 +79,81 @@ void configura_motores (int in1, int in2, int in3, int in4){
   digitalWrite(PH_IN4, in4);
 }
 
+
+//Funcao para calibrar os valores-padrao de maximo e minimo a serem utilizados
+//Na funcao leitura_encoder()
+void calibra_encoder(){
+  
+  int dir_agora, esq_agora;
+  //Ligamos os motores para um giro anti-horario do robo em seu proprio eixo
+  configura_velocidade(100, -100);
+  for(long i = 0; i < 10000; i++){
+    
+    dir_agora = analogRead(ENC_D);
+    
+    if(dir_agora > limsup_dir)
+      limsup_dir = dir_agora;
+    if(dir_agora < liminf_dir)
+      liminf_dir = dir_agora;
+      
+    esq_agora = analogRead(ENC_E);
+    
+    if(esq_agora > limsup_esq)
+      limsup_esq = esq_agora;
+    if(esq_agora < liminf_esq)
+      liminf_esq = esq_agora;
+
+  }
+  //Paramos os motores
+  para_motores(1,1);
+  
+  delay(1000);
+
+  
+  //Ligamos os motores para um giro horario do robo em seu proprio eixo
+  configura_velocidade(-100, 100);
+  for(long i = 0; i < 10000; i++){
+    
+    dir_agora = analogRead(ENC_D);
+    
+    if(dir_agora > limsup_dir)
+      limsup_dir = dir_agora;
+    if(dir_agora < liminf_dir)
+      liminf_dir = dir_agora;
+      
+    esq_agora = analogRead(ENC_E);
+    
+    if(esq_agora > limsup_esq)
+      limsup_esq = esq_agora;
+    if(esq_agora < liminf_esq)
+      liminf_esq = esq_agora;
+
+  }
+  //Paramos os motores
+  para_motores(1,1);
+  
+  delay(500);
+  
+}
+
 void leitura_encoder(){
-  if(analogRead(ENC_D) > 0.6*limsup_dir + 0.4*liminf_dir && estado_direita == false)
+  if(analogRead(ENC_D) > 0.55*limsup_dir + 0.45*liminf_dir && estado_direita == false)
   {
     estado_direita = true;
     contador_direita++;
   }
-  if(analogRead(ENC_D) < 0.4*limsup_dir + 0.6*liminf_dir && estado_direita == true)
+  if(analogRead(ENC_D) < 0.45*limsup_dir + 0.55*liminf_dir && estado_direita == true)
   {
     estado_direita = false;
     contador_direita++;
   }
     
-  if(analogRead(ENC_E) > 0.6*limsup_esq + 0.4*liminf_esq && estado_esquerda == false)
+  if(analogRead(ENC_E) > 0.55*limsup_esq + 0.45*liminf_esq && estado_esquerda == false)
   {
     estado_esquerda = true;
     contador_esquerda++;
   }
-  if(analogRead(ENC_E) < 0.4*limsup_esq + 0.6*liminf_esq && estado_esquerda == true)
+  if(analogRead(ENC_E) < 0.45*limsup_esq + 0.55*liminf_esq && estado_esquerda == true)
   {
     estado_esquerda = false;
     contador_esquerda++;
@@ -106,39 +171,31 @@ void setup(){
  MsTimer2::start(); //Habilita RSI
  
  delay(5000);
- Serial.begin(9600);
+ calibra_encoder();
+
+ contador_esquerda = 0;
+ contador_direita = 0;
+
+ //Serial.begin(9600);
+ delay(5000);
 }
 
 void loop(){
-  //configura_velocidade(200,200);
-  
-  Serial.println(contador_esquerda);
-  Serial.println(contador_direita);
-  Serial.println();
-  
-  
+  /*
+  Serial.print("Esq: ");
+  Serial.print(limsup_esq);
+  Serial.print(" ");
+  Serial.print(liminf_esq);
+  Serial.print(" Dir: ");
+  Serial.print(limsup_dir);
+  Serial.print(" ");
+  Serial.print(liminf_dir);
+  Serial.print("\n");
+  delay(1000);
+  */
   long int erro = contador_direita - contador_esquerda;
   double kp = 2.5;
   configura_velocidade(max(min(255, 50 - kp * erro),-255),50);
   delay(50);
   
-/*  int dir = 0;
-  int esq = 0;
-  int dir_agora, esq_agora;
-  
-  for(long i = 0; i < 100000; i++){
-    
-    dir_agora = analogRead(ENC_D);
-    if(dir_agora > dir)
-      dir = dir_agora;
-    esq_agora = analogRead(ENC_E);
-    if (esq_agora > esq)
-      esq = esq_agora;
-    
-  }
-    Serial.println(dir);
-    Serial.println(esq);
-    Serial.println("");
-    delay(200);
-  */
 }
