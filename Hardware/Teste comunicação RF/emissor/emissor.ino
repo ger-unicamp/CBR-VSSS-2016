@@ -15,7 +15,7 @@ As portas para comunicacao SPI sao definidas por padrao no Uno e no Nano como: M
 #include "nRF24L01.h"
 #include "RF24.h"
 
-int joystick[2];
+byte velocidades[6];
 
 RF24 radio(CE,CSN);
 
@@ -29,9 +29,9 @@ void setup(void)
 
 void loop(void)
 {
-  joystick[0] = 111;
-  joystick[1] = 222;
+  for(int i=0; i<6; i++)
+    velocidades[i] = (i+20);
   
-  radio.write( joystick, sizeof(joystick) );
+  radio.write( velocidades, sizeof(velocidades) );
   
 }

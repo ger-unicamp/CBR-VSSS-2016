@@ -14,9 +14,9 @@ As portas para comunicacao SPI sao definidas por padrao no Uno e no Nano como: M
 #include "nRF24L01.h"
 #include "RF24.h"
 
-int velocidades[6];
+byte velocidades[6];
 
-RF24 radio(3,4);
+RF24 radio(9,10);
 const uint64_t pipe = 0xA2E8F0F0E1LL;
 
 void setup(void)
@@ -35,13 +35,14 @@ void loop(void)
     while (!done)
     {
       done = radio.read( velocidades, sizeof(velocidades) );
-      Serial.println(velocidades[0]);
+      for(int i=0; i<6; i++)
+        Serial.println(velocidades[i]);
     }
 
   }
   else
   {
-    Serial.println("Rádio não disponível");
+    Serial.println("Radio nao disponivel");
   }
   // Delay para facilitar a visualização das informações no serial monitor
   delay(1000);
