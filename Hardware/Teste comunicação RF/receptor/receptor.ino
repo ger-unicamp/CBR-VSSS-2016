@@ -7,8 +7,8 @@ No nosso Aduino Nano, as portas (CE,CSN) sao (3,4); no nosso Arduino Uno emissor
 As portas para comunicacao SPI sao definidas por padrao no Uno e no Nano como: MOSI 11, MISO 12, SCK 13.
 */
  
-//CE 9
-//CSN 10 
+#define CE 3
+#define CSN 4 
 
 #include <SPI.h>
 #include "nRF24L01.h"
@@ -16,7 +16,7 @@ As portas para comunicacao SPI sao definidas por padrao no Uno e no Nano como: M
 
 byte velocidades[6];
 
-RF24 radio(9,10);
+RF24 radio(CE,CSN);
 const uint64_t pipe = 0xA2E8F0F0E1LL;
 
 void setup(void)

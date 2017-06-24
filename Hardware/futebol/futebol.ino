@@ -1,3 +1,11 @@
+/*
+Codigo que recebe mensagem pelo RF e faz os motores girarem conforme velocidade enviada.
+*/
+
+#include <SPI.h>
+#include "nRF24L01.h"
+#include "RF24.h"
+
 //Pinos da Ponte H
 #define PH_IN1 5
 #define PH_IN2 6
@@ -14,6 +22,18 @@
 //Pinos do Encoder
 #define ENC_R A6
 #define ENC_L A7
+
+RF24 radio(3,4);
+const uint64_t pipe = 0xA2E8F0F0E1LL;
+
+struct Mensagem{
+  int VEL1_DIR;
+  int VEL1_ESQ;
+  int VEL2_DIR;
+  int VEL2_ESQ;
+  int VEL3_DIR;
+  int VEL3_ESQ;
+} mensagem;
 
 //Configura velocidade dos motores (para frente ou para tras) com PWM
 void configura_velocidade (int motorA, int motorB){
@@ -58,28 +78,49 @@ void configura_motores (int in1, int in2, int in3, int in4){
 
 //Inicializacoes
 void setup(){
- pinMode(PH_IN1, OUTPUT);
- pinMode(PH_IN2, OUTPUT);
- pinMode(PH_IN3, OUTPUT);
- pinMode(PH_IN4, OUTPUT);
+  pinMode(PH_IN1, OUTPUT);
+  pinMode(PH_IN2, OUTPUT);
+  pinMode(PH_IN3, OUTPUT);
+  pinMode(PH_IN4, OUTPUT);
  
- delay(500);
- Serial.begin(9600);
+  delay(500);
+  Serial.begin(9600);
+ 
+  radio.begin();
+  radio.openReadingPipe(1,pipe);
+  radio.startListening();
  
  configura_velocidade(200,200);
 }
 
 void loop(){
-  Serial.println(analogRead(ENC_R));
-  Serial.println(analogRead(ENC_L));
-  Serial.println( );
-  delay(200);
+
+int motor1;
+int motor2;
   
-  /*for(int i=0; i<256; i++)
+  if(radio.available())
   {
-   configura_velocidade(i,i);
-  delay(10); 
+    bool done = false;
+    while (!done)
+    {
+      done = radio.read( &mensagem, sizeof(mensagem) );
+      motor1 = mensagem.VEL2_DIR;
+      motor2 = mensagem.VEL2_ESQ;
+      /*
+      Serial.println(mensagem.VEL1_DIR);
+      Serial.println(mensagem.VEL1_ESQ);
+      Serial.println(mensagem.VEL2_DIR);
+      Serial.println(mensagem.VEL2_ESQ);
+      Serial.println(mensagem.VEL3_DIR);
+      Serial.println(mensagem.VEL3_ESQ);
+      */
+      configura_velocidade(motor1,motor2);
+    }
+
   }
-  para_motores(1,1);
-  delay(2000);*/
+  else
+  {
+    Serial.println("Rádio não disponível");
+  }
+
 }
