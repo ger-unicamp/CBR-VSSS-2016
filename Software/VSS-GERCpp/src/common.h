@@ -27,7 +27,7 @@ namespace common{
             x = y = z = 0;
         };
         //! Construtor XYZ: btVector3 bt3(x, y, z);
-        btVector3(float x, float y, float z){
+        btVector3(float x, float y, float z = 0){
             this->x = x;
             this->y = y;
             this->z = z;

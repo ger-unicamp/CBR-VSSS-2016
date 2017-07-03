@@ -55,13 +55,6 @@ int signal_go = 0;
 // vetor de 0 graus aponta pra esqueda, aumenta no sentido horário
 
 void Strategy::calc_strategy(){
-	if(changePose){
-		//changePose = false;
-		final = state.ball;
-		//final.x = (rand() % 100) + 30;
-		//final.y = (rand() % 80) + 30;
-		//final.z = rand() % 360;
-	}
 
 	btVector3 final_goleiro;
 	btVector3 final_atacante;
@@ -84,10 +77,17 @@ void Strategy::calc_strategy(){
 //	final_atacante.x -= 15;
 	final_atacante.z = atan2(65 - state.ball.y, 160 - state.ball.x) * 180 / M_PI + 180;
 
-	if(distancePoint(final_atacante, state.robots[atacante].pose) > target_dist)
+	printf("%lf\n", potencial(state.robots[atacante].pose));
+//	if(distancePoint(final_atacante, state.robots[atacante].pose) > target_dist)
+
+	for(int i = 10; i <= 160; i += 10, printf("\n"))
+		for(int j = 0; j <= 130; j += 10)
+			printf("%.1lf ", potencial(btVector3((double) i, (double) j)));
+	if(true)
 	{
 		target_dist = 2;
-		commands[atacante] = calc_cmd_to(state.robots[atacante].pose, final_atacante, 0);
+//		commands[atacante] = calc_cmd_to(state.robots[atacante].pose, final_atacante, 0);
+		commands[atacante] = calc_cmd_to(state.robots[atacante].pose, state.robots[atacante].pose - gradiente(state.robots[atacante].pose), 0);
 	}
 	else
 	{
@@ -122,7 +122,7 @@ void Strategy::calc_strategy(){
 	debug.robots_path[goleiro].poses.push_back(final_goleiro);
 	
 	debug.robots_path[atacante].poses.push_back(state.robots[atacante].pose);
-	debug.robots_path[atacante].poses.push_back(final_atacante);
+	debug.robots_path[atacante].poses.push_back(state.robots[atacante].pose - gradiente(state.robots[atacante].pose));
 }
 
 common::Command Strategy::acertar_angulo(btVector3 act, btVector3 goal){
@@ -158,6 +158,33 @@ common::Command Strategy::acertar_angulo(btVector3 act, btVector3 goal){
 	return cmd;
 }
 
+btVector3 Strategy::gradiente(btVector3 pos)
+{
+	btVector3 retv;
+	retv.x = potencial(btVector3(pos.x + 1.0, pos.y)) - potencial(pos);
+	retv.y = potencial(btVector3(pos.x, pos.y + 1.0)) - potencial(pos);
+	double k = 40 / sqrt(retv.x*retv.x + retv.y*retv.y);
+	retv = retv * k;
+	return retv;
+}
+
+double Strategy::potencial(btVector3 pos)
+{
+	double retv = 0;
+	retv += 1000 / ((pos.x-10)*(pos.x-10));
+	retv += 1000 / ((160 - pos.x)*(160 - pos.x));
+	retv += 1000 / (pos.y*pos.y);
+	retv += 1000 / ((130 - pos.y)*(130 - pos.y));
+
+	for(int i = 3; i < 6; i++)
+	{
+		if(distancePoint(pos, state.robots[i].pose) != 0)
+			retv += 4000 / (distancePoint(pos, state.robots[i].pose)*distancePoint(pos, state.robots[i].pose));
+	}
+	if(distancePoint(pos, state.ball) != 0)
+		retv += -1000 / distancePoint(pos, state.ball);
+	return retv;
+}
 
 common::Command Strategy::calc_cmd_to(btVector3 act, btVector3 goal, float distance_to_stop){
 	Command cmd;
@@ -196,9 +223,9 @@ common::Command Strategy::calc_cmd_to(btVector3 act, btVector3 goal, float dista
 		cmd.left *= 0.5;
 		cmd.right *= 0.5;
 
-		if(sqrt(cmd.left*cmd.left + cmd.right*cmd.right) < 150)
+		if(sqrt(cmd.left*cmd.left + cmd.right*cmd.right) < 50)
 		{
-			float k = sqrt(150 / sqrt(cmd.left*cmd.left + cmd.right*cmd.right));
+			float k = 50 / sqrt(cmd.left*cmd.left + cmd.right*cmd.right);
 			cmd.left *= k;
 			cmd.right *= k;
 		}

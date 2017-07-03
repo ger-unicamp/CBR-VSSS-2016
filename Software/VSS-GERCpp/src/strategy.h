@@ -40,6 +40,8 @@ public:
 	void calc_strategy();
 
 	common::Command acertar_angulo(btVector3 act, btVector3 goal);
+	btVector3 gradiente(btVector3 pos);
+	double potencial(btVector3 pos);
 	common::Command calc_cmd_to(btVector3 init, btVector3 final, float distance_to_stop = 10.0);
 };
 
