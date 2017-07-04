@@ -29,14 +29,17 @@
 //Variaveis globais de leitura de encoder
 int limsup_dir = 0;
 int limsup_esq = 0;
-int liminf_dir = 1024;
-int liminf_esq = 1024;
+int liminf_dir = 1023;
+int liminf_esq = 1023;
 
 //Variaveis globais
 volatile boolean estado_direita = false;
 volatile boolean estado_esquerda = false;
 volatile long int contador_direita = 0;
 volatile long int contador_esquerda = 0;
+volatile int timer = 0;
+volatile float vel_atual_dir;
+volatile float vel_atual_esq;
 
 //Configura velocidade dos motores (para frente ou para tras) com PWM
 void configura_velocidade (int motorA, int motorB){
@@ -137,27 +140,41 @@ void calibra_encoder(){
 }
 
 void leitura_encoder(){
-  if(analogRead(ENC_D) > 0.55*limsup_dir + 0.45*liminf_dir && estado_direita == false)
+  timer++;
+  
+  if(analogRead(ENC_D) > 0.70*limsup_dir + 0.30*liminf_dir && estado_direita == false)
   {
     estado_direita = true;
     contador_direita++;
   }
-  if(analogRead(ENC_D) < 0.45*limsup_dir + 0.55*liminf_dir && estado_direita == true)
+  if(analogRead(ENC_D) < 0.30*limsup_dir + 0.70*liminf_dir && estado_direita == true)
   {
     estado_direita = false;
-    contador_direita++;
+    //contador_direita++;
   }
     
-  if(analogRead(ENC_E) > 0.55*limsup_esq + 0.45*liminf_esq && estado_esquerda == false)
+  if(analogRead(ENC_E) > 0.70*limsup_esq + 0.30*liminf_esq && estado_esquerda == false)
   {
     estado_esquerda = true;
     contador_esquerda++;
   }
-  if(analogRead(ENC_E) < 0.45*limsup_esq + 0.55*liminf_esq && estado_esquerda == true)
+  if(analogRead(ENC_E) < 0.30*limsup_esq + 0.70*liminf_esq && estado_esquerda == true)
   {
     estado_esquerda = false;
-    contador_esquerda++;
+    //contador_esquerda++;
   }
+  
+  //if((timer % 100) == 0){
+    vel_atual_dir = (((contador_direita)/12.0) / ((float)timer))*10000.0;   //Frequencia angular em Hz
+    vel_atual_esq = (((contador_esquerda)/12.0) / ((float)timer))*10000.0;  //Frequencia angular em Hz
+    
+    if(timer == 1000){
+      timer = 0;
+      contador_direita = 0;
+      contador_esquerda = 0;
+    }
+      
+  //}
 }
 
 //Inicializacoes
@@ -170,17 +187,21 @@ void setup(){
  MsTimer2::set(1, leitura_encoder); //RSI periodica leitura_encoder com T=1ms
  MsTimer2::start(); //Habilita RSI
  
- delay(5000);
+ delay(10000);
  calibra_encoder();
 
  contador_esquerda = 0;
  contador_direita = 0;
-
- //Serial.begin(9600);
- delay(5000);
+ 
+ Serial.begin(9600);
 }
 
 void loop(){
+  configura_velocidade(200,200);
+  Serial.print("ESQ=");
+  Serial.print(vel_atual_dir);
+  Serial.print(" DIR=");
+  Serial.println(vel_atual_esq);
   /*
   Serial.print("Esq: ");
   Serial.print(limsup_esq);
@@ -193,9 +214,9 @@ void loop(){
   Serial.print("\n");
   delay(1000);
   */
-  long int erro = contador_direita - contador_esquerda;
+  /*long int erro = contador_direita - contador_esquerda;
   double kp = 2.5;
   configura_velocidade(max(min(255, 50 - kp * erro),-255),50);
-  delay(50);
+  delay(50);*/
   
 }
