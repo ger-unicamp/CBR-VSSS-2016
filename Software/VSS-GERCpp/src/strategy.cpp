@@ -77,17 +77,18 @@ void Strategy::calc_strategy(){
 //	final_atacante.x -= 15;
 	final_atacante.z = atan2(65 - state.ball.y, 160 - state.ball.x) * 180 / M_PI + 180;
 
-	printf("%lf\n", potencial(state.robots[atacante].pose));
+	printf("%lf\n", potencial(state.robots[atacante].pose, atacante));
 //	if(distancePoint(final_atacante, state.robots[atacante].pose) > target_dist)
 
 	for(int i = 10; i <= 160; i += 10, printf("\n"))
 		for(int j = 0; j <= 130; j += 10)
-			printf("%.1lf ", potencial(btVector3((double) i, (double) j)));
-	if(true)
+			printf("%.1lf ", potencial(btVector3((double) i, (double) j), atacante));
+	commands[atacante] = calc_cmd_to(state.robots[atacante].pose, state.robots[atacante].pose - gradiente(state.robots[atacante].pose, atacante), 0);
+
+/*	if(true)
 	{
 		target_dist = 2;
 //		commands[atacante] = calc_cmd_to(state.robots[atacante].pose, final_atacante, 0);
-		commands[atacante] = calc_cmd_to(state.robots[atacante].pose, state.robots[atacante].pose - gradiente(state.robots[atacante].pose), 0);
 	}
 	else
 	{
@@ -101,6 +102,8 @@ void Strategy::calc_strategy(){
 
 	if(signal_go)
 		commands[atacante].right = commands[atacante].left = 50;
+
+	*/
 
 //	commands[1] = commands[atacante];
 	commands[goleiro] = calc_cmd_to(state.robots[goleiro].pose, final_goleiro, 1);
@@ -122,7 +125,7 @@ void Strategy::calc_strategy(){
 	debug.robots_path[goleiro].poses.push_back(final_goleiro);
 	
 	debug.robots_path[atacante].poses.push_back(state.robots[atacante].pose);
-	debug.robots_path[atacante].poses.push_back(state.robots[atacante].pose - gradiente(state.robots[atacante].pose));
+	debug.robots_path[atacante].poses.push_back(state.robots[atacante].pose - gradiente(state.robots[atacante].pose, atacante));
 }
 
 common::Command Strategy::acertar_angulo(btVector3 act, btVector3 goal){
@@ -158,17 +161,17 @@ common::Command Strategy::acertar_angulo(btVector3 act, btVector3 goal){
 	return cmd;
 }
 
-btVector3 Strategy::gradiente(btVector3 pos)
+btVector3 Strategy::gradiente(btVector3 pos, int meu_robo)
 {
 	btVector3 retv;
-	retv.x = potencial(btVector3(pos.x + 1.0, pos.y)) - potencial(pos);
-	retv.y = potencial(btVector3(pos.x, pos.y + 1.0)) - potencial(pos);
+	retv.x = potencial(btVector3(pos.x + 1.0, pos.y), meu_robo) - potencial(pos, meu_robo);
+	retv.y = potencial(btVector3(pos.x, pos.y + 1.0), meu_robo) - potencial(pos, meu_robo);
 	double k = 40 / sqrt(retv.x*retv.x + retv.y*retv.y);
 	retv = retv * k;
 	return retv;
 }
 
-double Strategy::potencial(btVector3 pos)
+double Strategy::potencial(btVector3 pos, int meu_robo)
 {
 	double retv = 0;
 	retv += 1000 / ((pos.x-10)*(pos.x-10));
@@ -176,13 +179,17 @@ double Strategy::potencial(btVector3 pos)
 	retv += 1000 / (pos.y*pos.y);
 	retv += 1000 / ((130 - pos.y)*(130 - pos.y));
 
-	for(int i = 3; i < 6; i++)
+	for(int i = 0; i < 6; i++)
 	{
+		if(i == meu_robo)
+			continue;
+
 		if(distancePoint(pos, state.robots[i].pose) != 0)
 			retv += 4000 / (distancePoint(pos, state.robots[i].pose)*distancePoint(pos, state.robots[i].pose));
 	}
 	if(distancePoint(pos, state.ball) != 0)
 		retv += -1000 / distancePoint(pos, state.ball);
+
 	return retv;
 }
 
