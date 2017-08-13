@@ -39,6 +39,11 @@ public:
 	void loop();
 	void calc_strategy();
 
+	btVector3 futuro(btVector3 pos);
+	double produto_escalar(btVector3 a, btVector3 b);
+	double square(double x);
+	btVector3 normalizar(btVector3 vec);
+	btVector3 forcaResultante(btVector3 pos, btVector3 goal, int meu_robo);
 	common::Command acertar_angulo(btVector3 act, btVector3 goal);
 	btVector3 gradiente(btVector3 pos, int meu_robo);
 	double potencial(btVector3 pos, int meu_robo);
