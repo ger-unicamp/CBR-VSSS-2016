@@ -58,6 +58,7 @@ btVector3 gol_adversario(160, 65, 0);
 
 time_t sec;
 btVector3 prev_pos;
+int id = 0;
 
 queue<btVector3> prev_ball_pos;
 
@@ -147,9 +148,9 @@ void Strategy::calc_strategy(){
 	}
 
 
-	printf("*****\n");
-	final_atacante.show();
-	state.robots[atacante].pose.show();
+	printf("***** %d\n", id++);
+	for(int i = 0; i < 6; i++)
+		state.robots[i].pose.show();
 	for(int i = 0 ; i < 3 ; i++){
 		debug.robots_path[i].poses.clear();
 	}
