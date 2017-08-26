@@ -69,5 +69,6 @@ void loop(void)
   }
   
   radio.write(&mensagem, sizeof(mensagem));
-  //Serial.println("Enviou mensagem");
+  Serial.println("Enviou mensagem");
+  delay(20);
 }

@@ -41,8 +41,8 @@ void loop(void)
   mensagem.vel1_esq = 0;
   mensagem.vel2_dir = 0;
   mensagem.vel2_esq = 0;
-  mensagem.vel3_dir = 200;
-  mensagem.vel3_esq = 233;
+  mensagem.vel3_dir = 0;
+  mensagem.vel3_esq = 0;
   
   radio.write(&mensagem, sizeof(mensagem));
   //Serial.println("Enviou mensagem");
