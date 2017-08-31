@@ -33,5 +33,6 @@ int main(int argc, char *argv[])
         fprintf(file,"%c",','); //To separate digits
         usleep(1000);
     }
+    //usleep(1000000);
     fclose(file);
 }

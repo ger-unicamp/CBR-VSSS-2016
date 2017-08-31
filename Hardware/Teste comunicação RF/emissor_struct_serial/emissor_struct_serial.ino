@@ -41,34 +41,48 @@ void setup(void)
   mensagem.vel3_esq = 0;
 }
 
+int i;
+
+String instrucoes[6] = {"","","","","",""};
+
 void loop(void)
 {
-  String instrucoes[3] = {"", "", ""};
   if(Serial.available()){
-    int i = 0;
-    while(Serial.available()) {
-      char c = Serial.read();
-      if(c == ',')
+    char c = Serial.read();
+    if(c == '#'){
+      i = 0;
+      Serial.println("#");
+      for(int j=0; j<6; j++)
+        instrucoes[j] = "";
+    }
+    else{
+      if(c == ','){
         i++;
-      else
+      }
+      else{
         instrucoes[i] += c;
+      }
     }
   }
   
-  if(instrucoes[0].toInt() == 1){
-    mensagem.vel1_dir = instrucoes[1].toInt();
-    mensagem.vel1_esq = instrucoes[2].toInt();
-  }
-  else if(instrucoes[0].toInt() == 2){
-    mensagem.vel2_dir = instrucoes[1].toInt();
-    mensagem.vel2_esq = instrucoes[2].toInt();
-  }
-  else if(instrucoes[0].toInt() == 3){
-    mensagem.vel3_dir = instrucoes[1].toInt();
-    mensagem.vel3_esq = instrucoes[2].toInt();
-  }
+  mensagem.vel1_dir = instrucoes[0].toInt();
+  mensagem.vel1_esq = instrucoes[1].toInt();
+  mensagem.vel2_dir = instrucoes[2].toInt();
+  mensagem.vel2_esq = instrucoes[3].toInt();
+  mensagem.vel3_dir = instrucoes[4].toInt();
+  mensagem.vel3_esq = instrucoes[5].toInt();
   
   radio.write(&mensagem, sizeof(mensagem));
-  Serial.println("Enviou mensagem");
-  delay(20);
+  //Serial.println("Enviou mensagem");
+  Serial.print(mensagem.vel1_dir);
+  Serial.print(" ");
+  Serial.print(mensagem.vel1_esq);
+  Serial.print(" ");
+  Serial.print(mensagem.vel2_dir);
+  Serial.print(" ");
+  Serial.print(mensagem.vel2_esq);
+  Serial.print(" ");
+  Serial.print(mensagem.vel3_dir);
+  Serial.print(" ");
+  Serial.println(mensagem.vel3_esq);
 }
