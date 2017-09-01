@@ -1,6 +1,6 @@
 /*
  * Programa dos robos do futebol. Recebe informacoes enviadas por RF e aciona os motores. Controle nao implementado.
- * JOGADOR 1
+ * JOGADOR 2
 */
 
 #include <SPI.h>
@@ -105,8 +105,8 @@ int motor2;
     while (!done)
     {
       done = radio.read( &mensagem, sizeof(mensagem) );
-      motor1 = mensagem.VEL1_DIR;
-      motor2 = mensagem.VEL1_ESQ;
+      motor1 = mensagem.VEL2_DIR;
+      motor2 = mensagem.VEL2_ESQ;
       
       /*Serial.println(mensagem.VEL1_DIR);
       Serial.println(mensagem.VEL1_ESQ);
