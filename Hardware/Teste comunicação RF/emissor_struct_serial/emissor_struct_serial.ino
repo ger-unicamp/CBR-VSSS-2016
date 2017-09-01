@@ -32,7 +32,7 @@ void setup(void)
   Serial.begin(9600);
   radio.begin();
   radio.openWritingPipe(pipe);
-  Serial.println("Iniciou");
+//  Serial.println("Iniciou");
   mensagem.vel1_dir = 0;
   mensagem.vel1_esq = 0;
   mensagem.vel2_dir = 0;
@@ -47,19 +47,19 @@ String instrucoes[6] = {"","","","","",""};
 
 void loop(void)
 {
-  if(Serial.available()){
+  while(Serial.available()){
     char c = Serial.read();
     if(c == '#'){
       i = 0;
-      Serial.println("#");
-      for(int j=0; j<6; j++)
-        instrucoes[j] = "";
+      //Serial.println("#");
+      instrucoes[0] = "";
     }
     else{
       if(c == ','){
         i++;
+        instrucoes[i] = "";
       }
-      else{
+      else if(i < 6 && (c == '-' || isdigit(c))){
         instrucoes[i] += c;
       }
     }
@@ -74,7 +74,7 @@ void loop(void)
   
   radio.write(&mensagem, sizeof(mensagem));
   //Serial.println("Enviou mensagem");
-  Serial.print(mensagem.vel1_dir);
+/*  Serial.print(mensagem.vel1_dir);
   Serial.print(" ");
   Serial.print(mensagem.vel1_esq);
   Serial.print(" ");
@@ -84,5 +84,5 @@ void loop(void)
   Serial.print(" ");
   Serial.print(mensagem.vel3_dir);
   Serial.print(" ");
-  Serial.println(mensagem.vel3_esq);
+  Serial.println(mensagem.vel3_esq);*/
 }
