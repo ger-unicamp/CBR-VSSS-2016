@@ -1,5 +1,4 @@
 #include "stategy_interface.h"
-#include "VSS-Interface/cpp/interface.h"
 
 stategy_interface::stategy_interface(){
 }

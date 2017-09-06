@@ -2,6 +2,7 @@
 #define STRATEGY_INTERFACE_H
 
 #include "ger_vsss.hpp"
+#include "VSS-Interface/cpp/interface.h"
 
 class strategyInterface{
 	public:
