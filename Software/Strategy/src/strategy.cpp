@@ -7,12 +7,13 @@
  */
 
 #include "strategy.h"
+#include "arduino_serial.h"
 #include <queue>
 
 Strategy::Strategy(){
     main_color = "yellow";
     is_debug = false;
-    real_environment = false;
+    real_environment = /*false*/ true;
 	robot_radius = 8.0;
 	distance_to_stop = 5.0;
 	changePose = true;
@@ -21,11 +22,17 @@ Strategy::Strategy(){
 }
 
 void Strategy::init(string main_color, bool is_debug, bool real_environment, string ip_receive_state, string ip_send_debug, string ip_send_command, string name){
-	init_sample(main_color, is_debug, real_environment, ip_receive_state, ip_send_debug, ip_send_command, name);
+	init_sample(main_color, is_debug, /*real_environment*/ true, ip_receive_state, ip_send_debug, ip_send_command, name);
 	loop();
 }
 
+
+
 void Strategy::loop(){
+	SerialSender *sender;
+	if(real_environment){
+		sender = new SerialSender();
+	}
 	while(true){
 		// DON'T REMOVE receive_data();
 		receive_state();
@@ -38,6 +45,7 @@ void Strategy::loop(){
 			send_commands();
 			// DON'T REMOVE send_data();
 		}else{
+			sender->send(commands[0].right, commands[0].left, commands[1].right, commands[1].left, commands[2].right, commands[2].left);
 			// Put your transmission code here
 		}
 

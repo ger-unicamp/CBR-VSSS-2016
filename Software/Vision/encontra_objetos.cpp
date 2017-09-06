@@ -18,6 +18,8 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
+	StrategyInterface interface; // initializes interface
+	// Por algum motivo se essa linha não estiver no início a camera buga
 
 	VideoCapture cap(argv[1][0] - '0'); // opens the camera whose parameter was given
 
@@ -41,7 +43,6 @@ int main(int argc, char* argv[])
 
 	bool unset = false;
 
-	StrategyInterface interface; // initializes interface
 
 	while (1)
 	{
@@ -55,6 +56,7 @@ int main(int argc, char* argv[])
 			 break;
 		}
 
+		set_border_manually(frame, Point2f(92,48), Point2f(542,48), Point2f(530,448), Point2f(86,427));
 		Mat transformed_frame = transform(frame);
 	
 		if(unset)
@@ -96,12 +98,12 @@ int main(int argc, char* argv[])
 				fieldState.blue_pos[type] = Point2f((150.0 * primary_circles[i].center.x / dWidth) + 10, (130.0 * primary_circles[i].center.y / dHeight));
 				// calculates direction in range (0, 360) degrees
 				// TODO check if the simulator and this are using the same zero
-				fieldState.blue_dir[type] = (M_PI + atan2(secondary_circles[type][index].center.y - primary_circles[i].center.y, secondary_circles[type][index].center.x - primary_circles[i].center.x)) * (180/M_PI);
+				fieldState.blue_dir[type] = (M_PI + atan2(secondary_circles[type][index].center.y - primary_circles[i].center.y, secondary_circles[type][index].center.x - primary_circles[i].center.x))  ;
 			}
 			else
 			{
 				fieldState.yellow_pos[type] = Point2f((150.0 * primary_circles[i].center.x / dWidth) + 10, (130.0 * primary_circles[i].center.y / dHeight));
-				fieldState.yellow_dir[type] = (M_PI + atan2(secondary_circles[type][index].center.y - primary_circles[i].center.y, secondary_circles[type][index].center.x - primary_circles[i].center.x)) * (180/M_PI);
+				fieldState.yellow_dir[type] = (M_PI + atan2(secondary_circles[type][index].center.y - primary_circles[i].center.y, secondary_circles[type][index].center.x - primary_circles[i].center.x)) ; 
 			}
 
 			printf("\nx_robo%d=%.1f, y_robo%d=%.1f\n", type, primary_circles[i].center.x, type, primary_circles[i].center.y);
