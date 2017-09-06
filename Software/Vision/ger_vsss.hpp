@@ -25,6 +25,13 @@ struct color_range{
     int hmin, hmax, smin, smax, vmin, vmax;
     color_range(){}
     color_range(int x1, int x2, int x3, int x4, int x5, int x6) : hmin(x1), hmax(x2), smin(x3), smax(x4), vmin(x5), vmax(x6) {}
+    
+    bool operator == (color_range x) const
+    {
+    	return (hmin == x.hmin) && (hmax == x.hmax) &&
+    			(smin == x.smin) && (smax == x.smax) &&
+    			(vmin == x.vmin) && (vmax == x.vmax);
+    }
 };
 
 extern const color_range ball_color;

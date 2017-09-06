@@ -7,7 +7,7 @@
 #include <math.h>
 
 #include "ger_vsss.hpp"
-#include "interface/strategy_interface.h"
+#include "strategy_interface.h"
 
 int main(int argc, char* argv[])
 {	
@@ -113,9 +113,9 @@ int main(int argc, char* argv[])
 		for(int i = 0; i < 3 && i < opponent_circles.size(); i++)
 		{
 			if(primary_color == blue)
-				fieldState.yellow_pos[type] = Point2f((150.0 * opponent_circles[i].center.x / dWidth) + 10, (130.0 * opponent_circles[i].center.y / dHeight));
+				fieldState.yellow_pos[i] = Point2f((150.0 * opponent_circles[i].center.x / dWidth) + 10, (130.0 * opponent_circles[i].center.y / dHeight));
 			else
-				fieldState.blue_pos[type] = Point2f((150.0 * opponent_circles[i].center.x / dWidth) + 10, (130.0 * opponent_circles[i].center.y / dHeight));
+				fieldState.blue_pos[i] = Point2f((150.0 * opponent_circles[i].center.x / dWidth) + 10, (130.0 * opponent_circles[i].center.y / dHeight));
 
 			printf("\nx_opponent%d=%.1f, y_opponent%d=%.1f\n", i, opponent_circles[i].center.x, i, opponent_circles[i].center.y);
 		}

@@ -11,7 +11,7 @@ CCX = g++ -std=c++11
 DEBUG_FLAG = -g
 
 
-INCLUDES = -Isrc
+INCLUDES = -Isrc -I/usr/local/include/opencv -I/usr/local/include/opencv2 -L/usr/local/lib/ -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video -lopencv_features2d -lopencv_calib3d -lopencv_objdetect -lopencv_stitching -lopencv_imgcodecs -lopencv_videoio
 
 LIBRARIES_PROTO = `pkg-config --cflags --libs protobuf`
 LIBRARIES_BOOST = -lboost_system -lboost_filesystem -lboost_program_options -lboost_thread
@@ -30,8 +30,8 @@ FILE_NAMES = $(FILE_NAMES_SRC) $(FILE_NAMES_PROTOS)
 
 
 
-RELEASE = test_interface
-DEBUG = test_interface_debug
+RELEASE = encontra_objetos.exe
+DEBUG = encontra_objetos_debug.exe
 
 .cpp.o:
 	@$(CCX) $(INCLUDES) $(LIBRARIES) -Wall -Wformat -c -o $@ $<

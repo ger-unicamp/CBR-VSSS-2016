@@ -1,14 +1,11 @@
-#include "stategy_interface.h"
+#include "strategy_interface.h"
 
-stategy_interface::stategy_interface(){
+StrategyInterface::StrategyInterface(){
+
+    interface.createSocketSendState(&global_state);
 }
 
-void stategy_interface::sendToStrategy(State state){
-	vss_state::Global_State global_state;
-
-    Interface interface;
-    //! Define the interface VSS
-    interface.createSocketSendState(&global_state);
+void StrategyInterface::sendToStrategy(State state){
 
     global_state = vss_state::Global_State();
     global_state.set_id(0);
@@ -40,12 +37,12 @@ void stategy_interface::sendToStrategy(State state){
 }
 
 State::State(){
-	this.ball_pos(0,0);
+	this->ball_pos = Point2f(0,0);
 	for(int i =0; i <3; i++){
-		this.blue_pos[i](0,0);
-		this.blue_dir[i](0,0);
-		this.yellow_pos[i](0,0);
-		this.yellow_dir[i](0,0);
+		this->blue_pos[i] = Point2f(0,0);
+		this->blue_dir[i] = 0;
+		this->yellow_pos[i] = Point2f(0,0);
+		this->yellow_dir[i] = 0;
 	}
 }
 
