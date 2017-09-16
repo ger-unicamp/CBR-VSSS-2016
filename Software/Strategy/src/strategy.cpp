@@ -17,7 +17,7 @@ Strategy::Strategy(){
 	robot_radius = 8.0;
 	distance_to_stop = 5.0;
 	changePose = true;
-	goleiro = 0;
+	goleiro = 3;
 	srand(time(NULL));
 }
 
@@ -76,7 +76,7 @@ void Strategy::calc_strategy(){
 	if(prev_ball_pos.size() > 5)
 		prev_ball_pos.pop();
 
-	int atacante = 2;
+	int atacante = 5;
 
 	btVector3 final_goleiro;
 	btVector3 final_atacante;
@@ -90,17 +90,19 @@ void Strategy::calc_strategy(){
 	final_goleiro.z = 0;
 
 	signal_go = 0;
-	final_atacante = ((futuro(state.ball) - gol_adversario) * ((10.0 + distancePoint(futuro(state.ball), gol_adversario)) / distancePoint(futuro(state.ball), gol_adversario))) + gol_adversario;
+	final_atacante = state.ball;
+/*	final_atacante = ((futuro(state.ball) - gol_adversario) * ((10.0 + distancePoint(futuro(state.ball), gol_adversario)) / distancePoint(futuro(state.ball), gol_adversario))) + gol_adversario;
 	final_atacante.x = min(max((double) final_atacante.x, 16.0), 154.0);
-	final_atacante.y = min(max((double) final_atacante.y, 6.0), 124.0);
-	final_atacante.z = atan2(65 - state.ball.y, 160 - state.ball.x) * 180 / M_PI + 180;
+	final_atacante.y = min(max((double) final_atacante.y, 6.0), 124.0);*/
+//	final_atacante.z = atan2(65 - state.ball.y, 160 - state.ball.x) * 180 / M_PI + 180;
 
-	commands[atacante] = calc_cmd_to(state.robots[atacante].pose, state.robots[atacante].pose + normalizar(forcaResultante(state.robots[atacante].pose, final_atacante, atacante))*(distancePoint(final_atacante, state.robots[atacante].pose) + 1), 2);
+//	commands[atacante - 3] = calc_cmd_to(state.robots[atacante].pose, state.robots[atacante].pose + normalizar(forcaResultante(state.robots[atacante].pose, final_atacante, atacante))*(distancePoint(final_atacante, state.robots[atacante].pose) + 1), 2);
+	commands[atacante - 3] = calc_cmd_to(state.robots[atacante].pose, final_atacante, 2);
 
-	if(distancePoint(final_atacante, state.robots[atacante].pose) < target_dist)
+/*	if(distancePoint(final_atacante, state.robots[atacante].pose) < target_dist)
 	{
 		target_dist = 5;
-		commands[atacante] = acertar_angulo(state.robots[atacante].pose, final_atacante);
+		commands[atacante - 3] = acertar_angulo(state.robots[atacante].pose, final_atacante);
 	}
 	else
 	{
@@ -108,8 +110,8 @@ void Strategy::calc_strategy(){
 	}
 
 	if(signal_go)
-		commands[atacante].right = commands[atacante].left = 50;
-
+		commands[atacante - 3].right = commands[atacante].left = 50;
+*/
 /*	if(true)
 	{
 		target_dist = 2;
@@ -131,7 +133,7 @@ void Strategy::calc_strategy(){
 	*/
 
 //	commands[1] = commands[atacante];
-	commands[goleiro] = calc_cmd_to(state.robots[goleiro].pose, final_goleiro, 1);
+	commands[goleiro - 3] = calc_cmd_to(state.robots[goleiro].pose, final_goleiro, 1);
 	//commands[0] = calc_cmd_to(state.robots[0].pose, final, distance_to_stop);
 	//commands[2] = calc_cmd_to(state.robots[2].pose, final, distance_to_stop);
 
@@ -140,13 +142,13 @@ void Strategy::calc_strategy(){
 	// commands[2]
 	//debug.robots_final_pose[0] = final;
 
-	if(time(NULL) - sec >= 2)
+/*	if(time(NULL) - sec >= 2)
 	{
 		printf("ola\n");
 		if(distancePoint(state.robots[atacante].pose, prev_pos) < 2)
 		{
-			commands[atacante].right = -150;
-			commands[atacante].left = -50;			
+			commands[atacante - 3].right = -150;
+			commands[atacante - 3].left = -50;			
 		}
 		else
 		{
@@ -154,7 +156,7 @@ void Strategy::calc_strategy(){
 			prev_pos = state.robots[atacante].pose;
 		}
 	}
-
+*/
 
 	printf("***** %d\n", id++);
 	for(int i = 0; i < 6; i++)
@@ -162,12 +164,12 @@ void Strategy::calc_strategy(){
 	for(int i = 0 ; i < 3 ; i++){
 		debug.robots_path[i].poses.clear();
 	}
-	debug.robots_path[goleiro].poses.push_back(state.robots[goleiro].pose);
+/*	debug.robots_path[goleiro].poses.push_back(state.robots[goleiro].pose);
 	debug.robots_path[goleiro].poses.push_back(final_goleiro);
 	
 	debug.robots_path[atacante].poses.push_back(state.robots[atacante].pose);
 	debug.robots_path[atacante].poses.push_back(state.robots[atacante].pose + normalizar(forcaResultante(state.robots[atacante].pose, final_atacante, atacante))*(distancePoint(final_atacante, state.robots[atacante].pose) + 1));
-}
+*/}
 
 btVector3 Strategy::futuro(btVector3 pos)
 {
@@ -327,9 +329,9 @@ common::Command Strategy::calc_cmd_to(btVector3 act, btVector3 goal, float dista
 		cmd.left *= 0.5;
 		cmd.right *= 0.5;
 
-		if(sqrt(cmd.left*cmd.left + cmd.right*cmd.right) < 50)
+		if(sqrt(cmd.left*cmd.left + cmd.right*cmd.right) < 100)
 		{
-			float k = 50 / sqrt(cmd.left*cmd.left + cmd.right*cmd.right);
+			float k = 100 / sqrt(cmd.left*cmd.left + cmd.right*cmd.right);
 			cmd.left *= k;
 			cmd.right *= k;
 		}

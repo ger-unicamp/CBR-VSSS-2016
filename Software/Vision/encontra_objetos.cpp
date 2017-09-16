@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 			 break;
 		}
 
-		set_border_manually(frame, Point2f(92,48), Point2f(542,48), Point2f(530,448), Point2f(86,427));
+		set_border_manually(frame, Point2f(98,50), Point2f(548,48), Point2f(539,446), Point2f(95,425));
 		Mat transformed_frame = transform(frame);
 	
 		if(unset)
@@ -92,18 +92,18 @@ int main(int argc, char* argv[])
 			if(primary_circles[i].radius < 6 || min_dist > 22)
 				continue; // if the radius of the yellow circle is less than 8 or the secondary color is too far away (> 22), it is not a robot
 
-			if(primary_color == blue)
+			if(strcmp(argv[2], "blue"))
 			{
 				// transforms the field positions to the range (10, 160) for x and (0, 130) for y
 				fieldState.blue_pos[type] = Point2f((150.0 * primary_circles[i].center.x / dWidth) + 10, (130.0 * primary_circles[i].center.y / dHeight));
 				// calculates direction in range (0, 360) degrees
 				// TODO check if the simulator and this are using the same zero
-				fieldState.blue_dir[type] = (M_PI + atan2(secondary_circles[type][index].center.y - primary_circles[i].center.y, secondary_circles[type][index].center.x - primary_circles[i].center.x))  ;
+				fieldState.blue_dir[type] = (M_PI + atan2(secondary_circles[type][index].center.y - primary_circles[i].center.y, secondary_circles[type][index].center.x - primary_circles[i].center.x)) * (180 / M_PI) ;
 			}
 			else
 			{
 				fieldState.yellow_pos[type] = Point2f((150.0 * primary_circles[i].center.x / dWidth) + 10, (130.0 * primary_circles[i].center.y / dHeight));
-				fieldState.yellow_dir[type] = (M_PI + atan2(secondary_circles[type][index].center.y - primary_circles[i].center.y, secondary_circles[type][index].center.x - primary_circles[i].center.x)) ; 
+				fieldState.yellow_dir[type] = (M_PI + atan2(secondary_circles[type][index].center.y - primary_circles[i].center.y, secondary_circles[type][index].center.x - primary_circles[i].center.x)) * (180 / M_PI); 
 			}
 
 			printf("\nx_robo%d=%.1f, y_robo%d=%.1f\n", type, primary_circles[i].center.x, type, primary_circles[i].center.y);
@@ -114,10 +114,16 @@ int main(int argc, char* argv[])
 		sort(opponent_circles.begin(), opponent_circles.end());
 		for(int i = 0; i < 3 && i < opponent_circles.size(); i++)
 		{
-			if(primary_color == blue)
+			if(strcmp(argv[2], "blue"))
+			{
 				fieldState.yellow_pos[i] = Point2f((150.0 * opponent_circles[i].center.x / dWidth) + 10, (130.0 * opponent_circles[i].center.y / dHeight));
+				fieldState.yellow_dir[i] = 0;
+			}
 			else
+			{
 				fieldState.blue_pos[i] = Point2f((150.0 * opponent_circles[i].center.x / dWidth) + 10, (130.0 * opponent_circles[i].center.y / dHeight));
+				fieldState.blue_dir[i] = 0;
+			}
 
 			printf("\nx_opponent%d=%.1f, y_opponent%d=%.1f\n", i, opponent_circles[i].center.x, i, opponent_circles[i].center.y);
 		}

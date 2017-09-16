@@ -1,13 +1,13 @@
 #include "ger_vsss.hpp"
 #include <math.h>
 
-const color_range ball_color(9, 18, 240, 255, 240, 255);
-const color_range blue(99, 112, 190, 255, 220, 255);
-const color_range yellow(8, 37, 211, 255, 240, 255);
-const color_range green(50, 81, 119, 255, 111, 255);
+const color_range ball_color(3, 15, 201, 255, 243, 255);
+const color_range blue(95, 124, 147, 255, 194, 255);
+const color_range yellow(20, 35, 121, 210, 214, 255);
+const color_range green(65, 91, 110, 190, 109, 145);
 const color_range white(0, 255, 0, 170, 180, 255);
-const color_range red(160, 180, 200, 255, 140, 255);
-const color_range purple(126, 160, 105, 169, 200, 255);
+const color_range red(171, 2, 142, 255, 214, 255);
+const color_range purple(122, 151, 65, 120, 200, 255);
 // finds one of the vertices of the field (depending on the parameters)
 // used only by the transform function
 
@@ -110,6 +110,31 @@ Mat transform(Mat input)
 
 Mat find_color(const Mat input, color_range color)
 {
+	if(color.hmin > color.hmax)
+    {
+        Mat hsv_image = Mat::zeros(input.size(), CV_8UC3);
+        cvtColor(input, hsv_image, COLOR_BGR2HSV);
+
+        Mat binary_image; // filters the image to a binary image with the color requested
+        inRange(hsv_image, Scalar(color.hmin, color.smin, color.vmin), Scalar(180, color.smax, color.vmax), binary_image);
+        Mat binary_image2;
+        inRange(hsv_image, Scalar(0, color.smin, color.vmin), Scalar(color.hmax, color.smax, color.vmax), binary_image2);
+
+        binary_image = binary_image | binary_image2;
+
+        // Apply the erosion operation and then dilation. In theory, it removes small interferences from the image.
+        // Increase erosion size to remove bigger "spots"
+        int erosion_size = 1;
+        erode( binary_image, binary_image, getStructuringElement( MORPH_ELLIPSE,
+                                           Size( 2*erosion_size + 1, 2*erosion_size+1 ),
+                                           Point( erosion_size, erosion_size ) ) );
+        int dilation_size = 2;
+        dilate( binary_image, binary_image, getStructuringElement( MORPH_RECT,
+                                           Size( 2*dilation_size + 1, 2*dilation_size+1 ),
+                                           Point( dilation_size, dilation_size ) ) );
+
+        return binary_image;
+    }
 	// creates an HSV image from the input
     Mat hsv_image = Mat::zeros(input.size(), CV_8UC3);
     cvtColor(input, hsv_image, COLOR_BGR2HSV);

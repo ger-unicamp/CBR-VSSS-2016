@@ -35,9 +35,9 @@ int main(int argc, char* argv[])
 
     namedWindow( "Control", WINDOW_AUTOSIZE );
 
-    color_range color;
-    createTrackbar("Hmin", "Control", &color.hmin, 255);
-    createTrackbar("Hmax", "Control", &color.hmax, 255);
+    color_range color(0,180,0,255,0,255);
+    createTrackbar("Hmin", "Control", &color.hmin, 180);
+    createTrackbar("Hmax", "Control", &color.hmax, 180);
     createTrackbar("Smin", "Control", &color.smin, 255);
     createTrackbar("Smax", "Control", &color.smax, 255);
     createTrackbar("Vmin", "Control", &color.vmin, 255);
