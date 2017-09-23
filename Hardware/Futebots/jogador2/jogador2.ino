@@ -91,7 +91,7 @@ void setup(){
   radio.openReadingPipe(1,pipe);
   radio.startListening();
  
- configura_velocidade(200,200);
+ configura_velocidade(0,0);
 }
 
 void loop(){
@@ -108,12 +108,12 @@ int motor2;
       motor1 = mensagem.VEL2_DIR;
       motor2 = mensagem.VEL2_ESQ;
       
-      /*Serial.println(mensagem.VEL1_DIR);
+      Serial.println(mensagem.VEL1_DIR);
       Serial.println(mensagem.VEL1_ESQ);
       Serial.println(mensagem.VEL2_DIR);
       Serial.println(mensagem.VEL2_ESQ);
       Serial.println(mensagem.VEL3_DIR);
-      Serial.println(mensagem.VEL3_ESQ);*/
+      Serial.println(mensagem.VEL3_ESQ);
       
       configura_velocidade(motor1,motor2);
     }

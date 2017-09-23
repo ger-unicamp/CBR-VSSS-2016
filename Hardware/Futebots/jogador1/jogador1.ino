@@ -91,7 +91,7 @@ void setup(){
   radio.openReadingPipe(1,pipe);
   radio.startListening();
  
- configura_velocidade(200,200);
+ configura_velocidade(0,0);
 }
 
 void loop(){

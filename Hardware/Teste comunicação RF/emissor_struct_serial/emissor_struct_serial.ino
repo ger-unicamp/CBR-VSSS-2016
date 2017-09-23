@@ -85,4 +85,5 @@ void loop(void)
   Serial.print(mensagem.vel3_dir);
   Serial.print(" ");
   Serial.println(mensagem.vel3_esq);*/
+  delay(5);
 }
