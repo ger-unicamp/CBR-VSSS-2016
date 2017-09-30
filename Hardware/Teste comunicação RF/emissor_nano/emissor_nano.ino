@@ -1,13 +1,3 @@
- /*
-Este programa envia duas variáveis inteiras, via rádio usando um módulo nRF24L01
-
-Programa original disponibilizado por: 
-http://www.bajdi.com
-
-No nosso Aduino Nano, as portas (CE,CSN) sao (3,4); no nosso Arduino Uno emissor sao (9,10).
-As portas para comunicacao SPI sao definidas por padrao no Uno e no Nano como: MOSI 11, MISO 12, SCK 13.
-*/
-
 #define CE 3
 #define CSN 4
 

@@ -1,5 +1,10 @@
 //Inclusao de biblitoecas
 #include "MsTimer2.h"
+#include <SPI.h>
+#include "nRF24L01.h"
+#include "RF24.h"
+
+#define TAM 4
 
 //Pinos da Ponte H
 #define PH_IN1 5
@@ -9,7 +14,7 @@
 
 //Pinos do RF
 #define RF_CSN 4
-#define RF_CE 5
+#define RF_CE 3
 #define RF_MO 11
 #define RF_MI 12
 #define RF_SCK 13
@@ -18,14 +23,20 @@
 #define ENC_D A6
 #define ENC_E A7
 
+float mensagem[TAM];
+RF24 radio(RF_CE,RF_CSN);
+const uint64_t pipe = 0xA2E8F0F0E1LL;
+
 //Variaveis globais
 volatile boolean estado_direita = false;
 volatile boolean estado_esquerda = false;
 volatile long int contador_direita = 0;
 volatile long int contador_esquerda = 0;
 volatile int timer = 0;
-volatile float vel_atual_dir;
-volatile float vel_atual_esq;
+float vel_atual_dir;
+float vel_atual_esq;
+
+const float alpha = 5.0;   //Parametro do controle proporcional (obtido empiricamente)
 
 /*int limsup_dir = 0;
 int limsup_esq = 0;
@@ -37,10 +48,10 @@ int liminf_dir2 = 1023;
 int limsup_esq2 =0;
 int liminf_esq2 = 1023;
 
-#define limsup_dir 930
-#define liminf_dir 655
-#define limsup_esq 836
-#define liminf_esq 654
+#define limsup_dir 893
+#define liminf_dir 687
+#define limsup_esq 837
+#define liminf_esq 687
 
 //Configura velocidade dos motores (para frente ou para tras) com PWM
 void configura_velocidade (int motorA, int motorB){
@@ -109,16 +120,37 @@ void leitura_encoder(){
   }
   
   if((timer % 100) == 0){
-    vel_atual_dir = (((contador_direita)/24.0) / ((float)timer))*1000.0;   //Frequencia angular em Hz
-    vel_atual_esq = (((contador_esquerda)/24.0) / ((float)timer))*1000.0;  //Frequencia angular em Hz
+    vel_atual_dir = 100*(contador_direita) / (float)timer;
+    vel_atual_esq = 100*(contador_esquerda) / (float)timer;
 
-    if(timer == 1000){
+    if(timer == 200){
       timer = 0;
-      //contador_direita = 0;
-      //contador_esquerda = 0;
+      contador_direita = 0;
+      contador_esquerda = 0;
     }
       
   }
+}
+
+double ki = 1;
+long erro_acumulado = 0;
+
+//Rotina de controle
+int controle (float vel_atual, float vel_desejada){
+  int pwm = 127;
+  float erro = vel_atual - vel_desejada; //Calcula erro
+  erro_acumulado += erro;
+  int ajuste = (int)(alpha*erro + ki * erro_acumulado); //Calcula ajuste
+
+  //Calucla valor valor ajustado (pwm - ajuste), que deve estar entre 0 e 255
+  if(pwm - ajuste > 255)
+    pwm = 255; //Se for maior que 255, satura em 255
+  else if(pwm - ajuste < 0)
+    pwm = 0; //Se for menor que 0, satura em 0
+  else
+    pwm = pwm - ajuste;
+
+  return(pwm);
 }
 
 //Inicializacoes
@@ -135,13 +167,18 @@ void setup(){
 
  contador_esquerda = 0;
  contador_direita = 0;
+
+ radio.begin();
+ radio.openWritingPipe(pipe);
  
  Serial.begin(9600);
 
- configura_velocidade(200,200);
+ configura_velocidade(100,100);
 }
 
 void loop(){
+  float vel_desejada_dir = 10.0;
+  float vel_desejada_esq = 10.0;
   
   /*int dir = analogRead(ENC_D);
   int esq = analogRead(ENC_E);
@@ -163,16 +200,27 @@ void loop(){
   Serial.println(limsup_esq2);
   Serial.println(liminf_esq2);*/
 
-  Serial.println("dir,esq,erro");
-  Serial.println(contador_direita);
-  Serial.println(contador_esquerda);
-  
+  int ctrl_dir = controle(vel_atual_dir,vel_desejada_dir);
+  int ctrl_esq = controle(vel_atual_esq,vel_desejada_esq);
 
-  long int erro = contador_direita - contador_esquerda;
-  Serial.println(erro);
+  Serial.println("velocidade atual");
+  Serial.print(vel_atual_dir);
+  Serial.print(" ");
+  Serial.println(vel_atual_esq);
+  Serial.println("pwm");
+  Serial.print(ctrl_dir);
+  Serial.print(" ");
+  Serial.println(ctrl_esq);
+
+  configura_velocidade(ctrl_dir,ctrl_esq);
+
+  for(int i=0; i<TAM; i++){
+    mensagem[0] = vel_atual_dir;
+    mensagem[1] = vel_atual_esq;
+    //mensagem[2] = ctrl_dir;
+    //mensagem[3] = ctrl_esq;
+  }
   
-  double kp = 10.0;
-  configura_velocidade(max(min(255, 50 - kp * erro),-255),50);
+  radio.write( mensagem, sizeof(mensagem) );
   delay(50);
-  
 }
