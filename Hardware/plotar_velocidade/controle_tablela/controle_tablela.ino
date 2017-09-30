@@ -1,6 +1,5 @@
 //Inclusao de biblitoecas
 #include "MsTimer2.h"
-#include <EEPROM.h>
 
 //Pinos da Ponte H
 #define PH_IN1 5
@@ -175,7 +174,7 @@ void setup(){
  MsTimer2::set(1, leitura_encoder); //RSI periodica leitura_encoder com T=1ms
  MsTimer2::start(); //Habilita RSI
  
- delay(5000);
+ delay(1000);
  calibra_encoder();
 
  contador_esquerda = 0;
@@ -189,47 +188,44 @@ void setup(){
  Serial.print(" ");
  Serial.println(liminf_dir);
  delay(1000);
+ contador_esquerda = 0;
+ contador_direita = 0;
 }
 
+const byte tab_left[300] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 36, 36, 36, 36, 36, 36, 36, 36, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 42, 42, 42, 42, 42, 42, 42, 42, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 46, 46, 46, 46, 46, 46, 48, 48, 48, 48, 48, 48, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 52, 52, 54, 54, 54, 54, 56, 56, 56, 56, 56, 56, 56, 56, 58, 58, 58, 58, 58, 58, 61, 61, 61, 61, 61, 61, 64, 64, 64, 64, 66, 66, 68, 68, 70, 70, 72, 72, 72, 72, 74, 74, 74, 74, 76, 76, 76, 76, 79, 79, 79, 79, 83, 83, 83, 83, 86, 86, 88, 88, 91, 91, 94, 94, 96, 96, 98, 98, 102, 102, 107, 107, 117, 117, 129, 129, 141, 141, 154, 154, 154, 154, 154, 154, 158, 158, 158, 158, 158, 158, 162, 162, 168, 168, 174, 174, 180, 180, 185, 185, 190, 190, 190, 190, 197, 197, 203, 203, 208, 208, 208, 208, 214, 214, 219, 219, 227, 227, 231, 231, 239, 239, 249, 249, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250};
+const byte tab_right[300] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 30, 30, 30, 30, 30, 30, 30, 30, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 38, 38, 38, 38, 38, 38, 40, 40, 40, 40, 40, 40, 40, 40, 42, 42, 42, 42, 42, 42, 44, 44, 44, 44, 46, 46, 46, 46, 48, 48, 48, 48, 50, 50, 50, 50, 50, 50, 50, 50, 54, 54, 52, 52, 56, 56, 58, 58, 58, 58, 60, 60, 62, 62, 62, 62, 62, 62, 68, 68, 64, 64, 64, 64, 71, 71, 72, 72, 76, 76, 78, 78, 80, 80, 84, 84, 84, 84, 84, 84, 91, 91, 96, 96, 90, 90, 101, 101, 98, 98, 106, 106, 110, 110, 116, 116, 122, 122, 131, 131, 141, 141, 144, 144, 149, 149, 155, 155, 159, 159, 159, 159, 164, 164, 172, 172, 179, 179, 184, 184, 189, 189, 189, 189, 189, 189, 196, 196, 198, 198, 201, 201, 210, 210, 226, 226, 224, 224, 234, 234, 240, 240, 251, 251, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247, 247};
+
+
 void loop(){
-  for(int i = 0; i < 256; i += 2)
-  {
-    configura_velocidade(i,0);
-    delay(500);
-    contador_esquerda = 0;
-    contador_direita = 0;
-    delay(500);
-    int vesq = contador_esquerda * 2;
-    int vdir = contador_direita * 2;
-    EEPROM.write(i, (byte) (vesq >> 8));
-    EEPROM.write(i + 1, (byte) (vesq & 0xff));
-    Serial.print(i);
-    Serial.print(" ");
-    Serial.print(vesq);
-    Serial.print(" ");
-    Serial.println(vdir);
-  }
-  configura_velocidade(0,0);
-  delay(1000);
-  for(int i = 0; i < 256; i += 2)
-  {
-    configura_velocidade(0,i);
-    delay(500);
-    contador_esquerda = 0;
-    contador_direita = 0;
-    delay(500);
-    int vesq = contador_esquerda * 2;
-    int vdir = contador_direita * 2;
-    EEPROM.write(256 + i, (byte) (vdir >> 8));
-    EEPROM.write(256 + i + 1, (byte) (vdir & 0xff));
-    Serial.print(i);
-    Serial.print(" ");
-    Serial.print(vesq);
-    Serial.print(" ");
-    Serial.println(vdir);
-  }
-  configura_velocidade(0,0);
-  while(1);
+  contador_esquerda = 0;
+  contador_direita = 0;
+  delay(500);
+  int vel = 200;
+  int pwml = tab_left[vel];
+  int pwmr = tab_right[vel];
+  configura_velocidade(pwmr, pwml);
+  Serial.print(pwml);
+  Serial.print(" ");
+  Serial.println(pwmr);
+  Serial.print(contador_esquerda / 0.5);
+  Serial.print(" ");
+  Serial.println(contador_direita / 0.5);
+
+  
+  /*   contador_esquerda = 0;
+   contador_direita = 0;
+  delay(500);
+  double vel = 200;
+  int pwml = 5.0 - 40.0*log(1 - vel / 266.0);
+  int pwmr = 2.0 - 53.0*log(1 - vel / 264.0);
+  configura_velocidade(pwml, pwmr);
+  Serial.print(pwml);
+  Serial.print(" ");
+  Serial.println(pwmr);
+  Serial.print(contador_esquerda / 0.5);
+  Serial.print(" ");
+  Serial.println(contador_direita / 0.5);
+*/
   /*
   Serial.print("Esq: ");
   Serial.print(limsup_esq);

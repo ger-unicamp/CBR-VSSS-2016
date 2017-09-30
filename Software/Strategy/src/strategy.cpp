@@ -3,12 +3,14 @@
  *
  * This Source Code Form is subject to the terms of the GNU GENERAL PUBLIC LICENSE,
  * v. 3.0. If a copy of the GPL was not distributed with this
- * file, You can obtain one at http://www.gnu.org/licenses/gpl-3.0/.
- */
+ * file, You can obtain one at http://www.gnu.org/licenses/gpl-3.0/. */
+ 
 
 #include "strategy.h"
 #include "arduino_serial.h"
 #include <queue>
+
+#define theta z
 
 Strategy::Strategy(){
     main_color = "yellow";
@@ -56,6 +58,35 @@ void Strategy::loop(){
 	}
 }
 
+int id = 0;
+
+void Strategy::calc_strategy(){
+
+	for(int i = 0; i < 3; i++)
+	{
+		commands[i].right = 100;
+		commands[i].left = 100;
+/*		if((180 - state.robots[i+ 3].pose.theta) > 0)
+			commands[i].right = 40 - (180 - state.robots[i+ 3].pose.theta) * 0.2;
+		else	
+			commands[i].left = 40 + (180 - state.robots[i + 3].pose.theta) * 0.2;
+*/	}
+/*	if(id % 2 == 0)
+	{
+		for(int i = 0; i < 3; i++)
+		{
+			commands[i].right = 0;
+			commands[i].left = 0;
+		}
+	}
+*/	printf("***** %d\n", id++);
+	for(int i = 0; i < 6; i++)
+		state.robots[i].pose.show();	
+}
+
+
+
+/*
 float target_dist = 2;
 int signal_go = 0;
 btVector3 gol_adversario(160, 65, 0);
@@ -66,7 +97,6 @@ btVector3 gol_adversario(160, 65, 0);
 
 time_t sec;
 btVector3 prev_pos;
-int id = 0;
 
 queue<btVector3> prev_ball_pos;
 
@@ -93,7 +123,7 @@ void Strategy::calc_strategy(){
 	final_atacante = state.ball;
 /*	final_atacante = ((futuro(state.ball) - gol_adversario) * ((10.0 + distancePoint(futuro(state.ball), gol_adversario)) / distancePoint(futuro(state.ball), gol_adversario))) + gol_adversario;
 	final_atacante.x = min(max((double) final_atacante.x, 16.0), 154.0);
-	final_atacante.y = min(max((double) final_atacante.y, 6.0), 124.0);*/
+	final_atacante.y = min(max((double) final_atacante.y, 6.0), 124.0);
 //	final_atacante.z = atan2(65 - state.ball.y, 160 - state.ball.x) * 180 / M_PI + 180;
 
 //	commands[atacante - 3] = calc_cmd_to(state.robots[atacante].pose, state.robots[atacante].pose + normalizar(forcaResultante(state.robots[atacante].pose, final_atacante, atacante))*(distancePoint(final_atacante, state.robots[atacante].pose) + 1), 2);
@@ -111,7 +141,7 @@ void Strategy::calc_strategy(){
 
 	if(signal_go)
 		commands[atacante - 3].right = commands[atacante].left = 50;
-*/
+
 /*	if(true)
 	{
 		target_dist = 2;
@@ -130,7 +160,7 @@ void Strategy::calc_strategy(){
 	if(signal_go)
 		commands[atacante].right = commands[atacante].left = 50;
 
-	*/
+	
 
 //	commands[1] = commands[atacante];
 	commands[goleiro - 3] = calc_cmd_to(state.robots[goleiro].pose, final_goleiro, 1);
@@ -156,7 +186,7 @@ void Strategy::calc_strategy(){
 			prev_pos = state.robots[atacante].pose;
 		}
 	}
-*/
+
 
 	printf("***** %d\n", id++);
 	for(int i = 0; i < 6; i++)
@@ -169,7 +199,9 @@ void Strategy::calc_strategy(){
 	
 	debug.robots_path[atacante].poses.push_back(state.robots[atacante].pose);
 	debug.robots_path[atacante].poses.push_back(state.robots[atacante].pose + normalizar(forcaResultante(state.robots[atacante].pose, final_atacante, atacante))*(distancePoint(final_atacante, state.robots[atacante].pose) + 1));
-*/}
+}
+
+
 
 btVector3 Strategy::futuro(btVector3 pos)
 {
@@ -357,3 +389,4 @@ common::Command Strategy::calc_cmd_to(btVector3 act, btVector3 goal, float dista
 
 	return cmd;
 }
+*/
