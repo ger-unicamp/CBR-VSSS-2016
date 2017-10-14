@@ -123,5 +123,6 @@ int motor2;
   {
     Serial.println("Rádio não disponível");
   }
+  delay(100);
 
 }

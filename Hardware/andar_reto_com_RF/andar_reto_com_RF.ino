@@ -1,5 +1,8 @@
 //Inclusao de biblitoecas
 #include "MsTimer2.h"
+#include <SPI.h>
+#include "nRF24L01.h"
+#include "RF24.h"
 
 //Pinos da Ponte H
 #define PH_IN1 5
@@ -17,6 +20,18 @@
 //Pinos do Encoder
 #define ENC_D A6
 #define ENC_E A7
+
+RF24 radio(3,4);
+const uint64_t pipe = 0xA2E8F0F0E1LL;
+
+struct Mensagem{
+  int VEL1_DIR;
+  int VEL1_ESQ;
+  int VEL2_DIR;
+  int VEL2_ESQ;
+  int VEL3_DIR;
+  int VEL3_ESQ;
+} mensagem;
 
 //Limites inferior e superior para comparacao dos encoders
 /*
@@ -168,6 +183,10 @@ void setup(){
  pinMode(PH_IN2, OUTPUT);
  pinMode(PH_IN3, OUTPUT);
  pinMode(PH_IN4, OUTPUT);
+
+ radio.begin();
+ radio.openReadingPipe(1,pipe);
+ radio.startListening();
  
  MsTimer2::set(1, leitura_encoder); //RSI periodica leitura_encoder com T=1ms
  MsTimer2::start(); //Habilita RSI
@@ -233,59 +252,38 @@ void do_pid(long vell, long velr)
 }
 
 void loop(){
-  //Vai para frente
-  int velr = 100, vell = 100;
-  contador_esquerda = 0;
-  contador_direita = 0;
+  
+  int velr, vell;
+  
+  if(radio.available())
+  {
+    bool done = false;
+    while (!done)
+    {
+      done = radio.read( &mensagem, sizeof(mensagem) );
+      velr = mensagem.VEL1_DIR;
+      vell = mensagem.VEL1_ESQ;
+      
+      contador_esquerda = 0;
+      contador_direita = 0;
+      
+      Serial.println(mensagem.VEL1_DIR);
+      Serial.println(mensagem.VEL1_ESQ);
+      Serial.println(mensagem.VEL2_DIR);
+      Serial.println(mensagem.VEL2_ESQ);
+      Serial.println(mensagem.VEL3_DIR);
+      Serial.println(mensagem.VEL3_ESQ);
+    }
+
+  }
+  /*else
+  {
+    Serial.println("Rádio não disponível");
+  }*/
+  
   for(int i = 0; i < 100; i++)
   {
     do_pid(vell, velr);
     delay(10);
   }
-  //Para
-  para_motores(1,1);
-  delay(1000);
-    
-  //Gira em um sentido
-  velr = -100, vell = 100;
-  contador_esquerda = 0;
-  contador_direita = 0;
-  for(int i = 0; i < 100; i++)
-  {
-    do_pid(vell, velr);
-    delay(10);
-  }
-  //Para
-  para_motores(1,1);
-  delay(1000);
-
-  //Vai para tras
-  velr = -100, vell = -100;
-  contador_esquerda = 0;
-  contador_direita = 0;
-
-  for(int i = 0; i < 100; i++)
-  {
-    do_pid(vell, velr);
-    delay(10);
-  }
-  //Para
-  para_motores(1,1);
-  delay(1000);
-
-  //Gira no outro sentido
-  velr = 100, vell = -100;
-  contador_esquerda = 0;
-  contador_direita = 0;
-  for(int i = 0; i < 100; i++)
-  {
-    do_pid(vell, velr);
-    delay(10);
-  }
-  //Para
-  para_motores(1,1);
-  delay(1000);
-  contador_esquerda = 0;
-  contador_direita = 0;
-
 }
