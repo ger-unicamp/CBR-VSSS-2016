@@ -37,13 +37,13 @@ void setup(void)
 
 void loop(void)
 {
-  mensagem.vel1_dir = 0;
-  mensagem.vel1_esq = 0;
-  mensagem.vel2_dir = 0;
-  mensagem.vel2_esq = 0;
-  mensagem.vel3_dir = 0;
-  mensagem.vel3_esq = 0;
+  mensagem.vel1_dir = 1;
+  mensagem.vel1_esq = 2;
+  mensagem.vel2_dir = 3;
+  mensagem.vel2_esq = 4;
+  mensagem.vel3_dir = 5;
+  mensagem.vel3_esq = 6;
   
   radio.write(&mensagem, sizeof(mensagem));
-  //Serial.println("Enviou mensagem");
+  Serial.println("Enviou mensagem");
 }

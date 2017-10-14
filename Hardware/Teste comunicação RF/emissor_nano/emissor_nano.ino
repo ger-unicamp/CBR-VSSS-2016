@@ -5,7 +5,7 @@
 #include "nRF24L01.h"
 #include "RF24.h"
 
-#define TAM 10
+#define TAM 4
 
 int mensagem[TAM];
 
@@ -14,7 +14,8 @@ RF24 radio(CE,CSN);
 const uint64_t pipe = 0xA2E8F0F0E1LL;
 
 void setup(void)
-{ Serial.begin(9600);
+{ 
+  Serial.begin(9600);
   radio.begin();
   radio.openWritingPipe(pipe);
 }

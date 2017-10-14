@@ -15,7 +15,7 @@
 
 //Pinos do RF
 #define RF_CSN 4
-#define RF_CE 5
+#define RF_CE 3
 #define RF_MO 11
 #define RF_MI 12
 #define RF_SCK 13
@@ -108,12 +108,12 @@ int motor2;
       motor1 = mensagem.VEL1_DIR;
       motor2 = mensagem.VEL1_ESQ;
       
-      /*Serial.println(mensagem.VEL1_DIR);
+      Serial.println(mensagem.VEL1_DIR);
       Serial.println(mensagem.VEL1_ESQ);
       Serial.println(mensagem.VEL2_DIR);
       Serial.println(mensagem.VEL2_ESQ);
       Serial.println(mensagem.VEL3_DIR);
-      Serial.println(mensagem.VEL3_ESQ);*/
+      Serial.println(mensagem.VEL3_ESQ);
       
       configura_velocidade(motor1,motor2);
     }
