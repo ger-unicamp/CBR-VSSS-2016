@@ -5,7 +5,7 @@
 #include "nRF24L01.h"
 #include "RF24.h"
 
-#define TAM 4
+#define TAM 10
 
 int mensagem[TAM];
 
