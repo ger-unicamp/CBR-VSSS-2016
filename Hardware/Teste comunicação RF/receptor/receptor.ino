@@ -10,11 +10,13 @@ As portas para comunicacao SPI sao definidas por padrao no Uno e no Nano como: M
 #define CE 3
 #define CSN 4 
 
+#define TAM 10
+
 #include <SPI.h>
 #include "nRF24L01.h"
 #include "RF24.h"
 
-byte velocidades[6];
+int mensagem[TAM];
 
 RF24 radio(CE,CSN);
 const uint64_t pipe = 0xA2E8F0F0E1LL;
@@ -34,9 +36,9 @@ void loop(void)
     bool done = false;
     while (!done)
     {
-      done = radio.read( velocidades, sizeof(velocidades) );
-      for(int i=0; i<6; i++)
-        Serial.println(velocidades[i]);
+      done = radio.read( mensagem, sizeof(mensagem) );
+      for(int i=0; i < TAM; i++)
+        Serial.println(mensagem[i]);
     }
 
   }
@@ -45,5 +47,5 @@ void loop(void)
     Serial.println("Radio nao disponivel");
   }
   // Delay para facilitar a visualização das informações no serial monitor
-  delay(1000);
+  delay(20);
 }
