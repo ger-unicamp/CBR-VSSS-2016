@@ -1,5 +1,6 @@
 //Inclusao de biblitoecas
 #include "MsTimer2.h"
+#include<EEPROM.h>
 
 //Pinos da Ponte H
 #define PH_IN1 5
@@ -102,7 +103,6 @@ void calibra_encoder(){
       limsup_esq = esq_agora;
     if(esq_agora < liminf_esq)
       liminf_esq = esq_agora;
-
   }
   //Paramos os motores
   para_motores(1,1);
@@ -132,9 +132,32 @@ void calibra_encoder(){
   //Paramos os motores
   para_motores(1,1);
   
+  //escreve os limites na memoria EEPROM
+  EEPROM.write(0, (byte) (limsup_esq >> 8));
+  EEPROM.write(1, (byte) (limsup_esq & 0xff));
+    
+  EEPROM.write(2, (byte) (liminf_esq >> 8));
+  EEPROM.write(3, (byte) (liminf_esq & 0xff));
+
+  EEPROM.write(4, (byte) (limsup_dir >> 8));
+  EEPROM.write(5, (byte) (limsup_dir & 0xff));
+
+  EEPROM.write(6, (byte) (liminf_dir >> 8));
+  EEPROM.write(7, (byte) (liminf_dir & 0xff));
+  
   delay(500);
   
 }
+
+//recupera os limites superior e inferior da EEPPROM
+void ler_limites(){
+  limsup_esq = (((int) EEPROM.read(0)) << 8) + EEPROM.read(1);
+  liminf_esq = (((int) EEPROM.read(2)) << 8) +EEPROM.read(3);
+  
+  limsup_dir = (((int) EEPROM.read(4)) << 8) +EEPROM.read(5);
+  liminf_dir = (((int) EEPROM.read(6)) << 8) +EEPROM.read(7);
+}
+
 
 void leitura_encoder(){
   
@@ -173,6 +196,8 @@ void setup(){
  MsTimer2::start(); //Habilita RSI
  
  delay(5000);
+ configura_velocidade(100, 100);
+ delay(10000);
  calibra_encoder();
 
  contador_esquerda = 0;
@@ -188,7 +213,6 @@ void setup(){
  delay(1000);
  contador_esquerda = 0;
  contador_direita = 0;
- configura_velocidade(100, 100);
 }
 
 void do_pid(long vell, long velr)
@@ -239,7 +263,10 @@ void loop(){
   contador_direita = 0;
   for(int i = 0; i < 100; i++)
   {
-    do_pid(vell, velr);
+    //if(i < 50)
+      //do_pid(vell * (0.02 * (i+1)), velr * (0.02 * (i+1)));
+    //else
+      do_pid(vell, velr);
     delay(10);
   }
   //Para
@@ -252,7 +279,10 @@ void loop(){
   contador_direita = 0;
   for(int i = 0; i < 100; i++)
   {
-    do_pid(vell, velr);
+    //if(i < 50)
+      //do_pid(vell * (0.02 * (i+1)), velr * (0.02 * (i+1)));
+    //else
+      do_pid(vell, velr);
     delay(10);
   }
   //Para
@@ -266,7 +296,10 @@ void loop(){
 
   for(int i = 0; i < 100; i++)
   {
-    do_pid(vell, velr);
+    //if(i < 50)
+      //do_pid(vell * (0.02 * (i+1)), velr * (0.02 * (i+1)));
+    //else
+      do_pid(vell, velr);
     delay(10);
   }
   //Para
@@ -279,7 +312,10 @@ void loop(){
   contador_direita = 0;
   for(int i = 0; i < 100; i++)
   {
-    do_pid(vell, velr);
+    //if(i < 50)
+      //do_pid(vell * (0.02 * (i+1)), velr * (0.02 * (i+1)));
+    //else
+      do_pid(vell, velr);
     delay(10);
   }
   //Para
