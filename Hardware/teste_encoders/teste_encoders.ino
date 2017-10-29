@@ -34,11 +34,11 @@ volatile boolean estado_esquerda = false;
 volatile long int contador_direita = 0;
 volatile long int contador_esquerda = 0;
 volatile int timer = 0;
-float vel_atual_dir;
-float vel_atual_esq;
 
-const float Kp = 10.0;   //Parametro do controle proporcional (obtido empiricamente)
-const float Ki = 0.2;
+int pwm = 70;
+
+const float kp = 10.0;   //Parametro do controle proporcional (obtido empiricamente)
+const float ki = 0.2;
 
 long erro_acumulado_dir = 0;
 long erro_acumulado_esq = 0;
@@ -134,15 +134,15 @@ void leitura_encoder(){
 
 //Rotina de controle
 int controle (float vel_atual, float vel_desejada){
-  int pwm = 70;
-  float erro = vel_atual - vel_desejada; //Calcula erro
-  int ajuste = (int)(Kp*erro + Ki*erro_acumulado); //Calcula ajuste
+  
+  float erro = vel_atual - vel_desejada;  // calcula erro
+  int ajuste = (int)(kp * erro + ki * erro_acumulado); //Calcula ajuste
 
   //Calucla valor valor ajustado (pwm - ajuste), que deve estar entre 0 e 255
   if(pwm - ajuste > 255)
-    pwm = 255; //Se for maior que 255, satura em 255
+    pwm = 255; // se for maior que 255, satura em 255
   else if(pwm - ajuste < 0)
-    pwm = 0; //Se for menor que 0, satura em 0
+    pwm = 0;   // se for menor que 0, satura em 0
   else
     pwm = pwm - ajuste;
 
@@ -245,11 +245,14 @@ void setup(){
 }
 
 void loop(){
+  
+  float vel_atual_dir = 0;
+  float vel_atual_esq = 0;
   float vel_desejada_dir = 12.0;
   float vel_desejada_esq = 12.0;
   
-  int ctrl_dir = controle(vel_atual_dir,vel_desejada_dir);
-  int ctrl_esq = controle(vel_atual_esq,vel_desejada_esq);
+  int ctrl_dir = controle(vel_atual_dir, vel_desejada_dir);
+  int ctrl_esq = controle(vel_atual_esq, vel_desejada_esq);
 
   Serial.println("velocidade atual");
   Serial.print(vel_atual_dir);
