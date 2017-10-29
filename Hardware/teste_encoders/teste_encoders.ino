@@ -1,6 +1,7 @@
 //Inclusao de biblitoecas
 #include "MsTimer2.h"
 #include <SPI.h>
+#include<EEPROM.h>
 #include "nRF24L01.h"
 #include "RF24.h"
 
@@ -36,22 +37,21 @@ volatile int timer = 0;
 float vel_atual_dir;
 float vel_atual_esq;
 
-const float alpha = 5.0;   //Parametro do controle proporcional (obtido empiricamente)
+const float Kp = 10.0;   //Parametro do controle proporcional (obtido empiricamente)
+const float Ki = 0.2;
 
-/*int limsup_dir = 0;
-int limsup_esq = 0;
+long erro_acumulado_dir = 0;
+long erro_acumulado_esq = 0;
+
+int limsup_dir =0;
 int liminf_dir = 1023;
-int liminf_esq = 1023;*/
+int limsup_esq =0;
+int liminf_esq = 1023;
 
-int limsup_dir2 =0;
-int liminf_dir2 = 1023;
-int limsup_esq2 =0;
-int liminf_esq2 = 1023;
-
-#define limsup_dir 893
-#define liminf_dir 687
-#define limsup_esq 837
-#define liminf_esq 687
+//#define limsup_dir 893
+//#define liminf_dir 687
+//#define limsup_esq 837
+//#define liminf_esq 687
 
 //Configura velocidade dos motores (para frente ou para tras) com PWM
 void configura_velocidade (int motorA, int motorB){
@@ -96,7 +96,7 @@ void configura_motores (int in1, int in2, int in3, int in4){
 
 void leitura_encoder(){
   timer++;
-  
+    
   if(analogRead(ENC_D) > 0.55*limsup_dir + 0.45*liminf_dir && estado_direita == false)
   {
     estado_direita = true;
@@ -120,8 +120,8 @@ void leitura_encoder(){
   }
   
   if((timer % 100) == 0){
-    vel_atual_dir = 100*(contador_direita) / (float)timer;
-    vel_atual_esq = 100*(contador_esquerda) / (float)timer;
+    vel_atual_dir = (1000/24) * (contador_direita)/ (float)timer;
+    vel_atual_esq = (1000/24) * (contador_esquerda)/ (float)timer;
 
     if(timer == 200){
       timer = 0;
@@ -132,15 +132,11 @@ void leitura_encoder(){
   }
 }
 
-double ki = 1;
-long erro_acumulado = 0;
-
 //Rotina de controle
 int controle (float vel_atual, float vel_desejada){
-  int pwm = 127;
+  int pwm = 70;
   float erro = vel_atual - vel_desejada; //Calcula erro
-  erro_acumulado += erro;
-  int ajuste = (int)(alpha*erro + ki * erro_acumulado); //Calcula ajuste
+  int ajuste = (int)(Kp*erro + Ki*erro_acumulado); //Calcula ajuste
 
   //Calucla valor valor ajustado (pwm - ajuste), que deve estar entre 0 e 255
   if(pwm - ajuste > 255)
@@ -151,6 +147,79 @@ int controle (float vel_atual, float vel_desejada){
     pwm = pwm - ajuste;
 
   return(pwm);
+}
+
+//Funcao para calibrar os valores-padrao de maximo e minimo a serem utilizados
+//Na funcao leitura_encoder()
+void calibra_encoder(){
+  int dir_agora, esq_agora;
+  //Ligamos os motores para um giro anti-horario do robo em seu proprio eixo
+  configura_velocidade(100, -100);
+  for(long i = 0; i < 10000; i++){
+    
+    dir_agora = analogRead(ENC_D);
+    
+    if(dir_agora > limsup_dir)
+      limsup_dir = dir_agora;
+    if(dir_agora < liminf_dir)
+      liminf_dir = dir_agora;
+      
+    esq_agora = analogRead(ENC_E);
+    
+    if(esq_agora > limsup_esq)
+      limsup_esq = esq_agora;
+    if(esq_agora < liminf_esq)
+      liminf_esq = esq_agora;
+  }
+  //Paramos os motores
+  para_motores(1,1);
+  
+  delay(1000);
+  
+  //Ligamos os motores para um giro horario do robo em seu proprio eixo
+  configura_velocidade(-100, 100);
+  for(long i = 0; i < 10000; i++){
+    
+    dir_agora = analogRead(ENC_D);
+    if(dir_agora > limsup_dir)
+      limsup_dir = dir_agora;
+    if(dir_agora < liminf_dir)
+      liminf_dir = dir_agora;
+      
+    esq_agora = analogRead(ENC_E);    
+    if(esq_agora > limsup_esq)
+      limsup_esq = esq_agora;
+    if(esq_agora < liminf_esq)
+      liminf_esq = esq_agora;
+
+  }
+  //Paramos os motores
+  para_motores(1,1);
+  
+  //escreve os limites na memoria EEPROM
+  EEPROM.write(0, (byte) (limsup_esq >> 8));
+  EEPROM.write(1, (byte) (limsup_esq & 0xff));
+    
+  EEPROM.write(2, (byte) (liminf_esq >> 8));
+  EEPROM.write(3, (byte) (liminf_esq & 0xff));
+
+  EEPROM.write(4, (byte) (limsup_dir >> 8));
+  EEPROM.write(5, (byte) (limsup_dir & 0xff));
+
+  EEPROM.write(6, (byte) (liminf_dir >> 8));
+  EEPROM.write(7, (byte) (liminf_dir & 0xff));
+  
+  delay(500);
+  
+}
+
+//recupera os limites superior e inferior da EEPPROM
+void ler_limites(){
+  limsup_esq = (((int) EEPROM.read(0)) << 8) + EEPROM.read(1);
+  liminf_esq = (((int) EEPROM.read(2)) << 8) +EEPROM.read(3);
+  
+  limsup_dir = (((int) EEPROM.read(4)) << 8) +EEPROM.read(5);
+  liminf_dir = (((int) EEPROM.read(6)) << 8) +EEPROM.read(7);
 }
 
 //Inicializacoes
@@ -170,36 +239,15 @@ void setup(){
 
  radio.begin();
  radio.openWritingPipe(pipe);
- 
  Serial.begin(9600);
 
- configura_velocidade(100,100);
+ ler_limites();
 }
 
 void loop(){
-  float vel_desejada_dir = 10.0;
-  float vel_desejada_esq = 10.0;
+  float vel_desejada_dir = 12.0;
+  float vel_desejada_esq = 12.0;
   
-  /*int dir = analogRead(ENC_D);
-  int esq = analogRead(ENC_E);
-
-  if(dir > limsup_dir2)
-    limsup_dir2 = dir;
-  if(dir < liminf_dir2)
-    liminf_dir2 = dir;
-
-  if(esq > limsup_esq2)
-    limsup_esq2 = esq;
-  if(esq < liminf_esq2)
-    liminf_esq2 = esq;
-
-  Serial.println("Direita (max, min");
-  Serial.println(limsup_dir2);
-  Serial.println(liminf_dir2);
-  Serial.println("Esquerda( max,min)");
-  Serial.println(limsup_esq2);
-  Serial.println(liminf_esq2);*/
-
   int ctrl_dir = controle(vel_atual_dir,vel_desejada_dir);
   int ctrl_esq = controle(vel_atual_esq,vel_desejada_esq);
 
@@ -207,20 +255,20 @@ void loop(){
   Serial.print(vel_atual_dir);
   Serial.print(" ");
   Serial.println(vel_atual_esq);
-  Serial.println("pwm");
+  Serial.println("pwm ajustada");
   Serial.print(ctrl_dir);
   Serial.print(" ");
   Serial.println(ctrl_esq);
 
   configura_velocidade(ctrl_dir,ctrl_esq);
 
-  for(int i=0; i<TAM; i++){
+  /*for(int i=0; i<TAM; i++){
     mensagem[0] = vel_atual_dir;
     mensagem[1] = vel_atual_esq;
-    //mensagem[2] = ctrl_dir;
-    //mensagem[3] = ctrl_esq;
+    mensagem[2] = ctrl_dir;
+    mensagem[3] = ctrl_esq;
   }
   
-  radio.write( mensagem, sizeof(mensagem) );
-  delay(50);
+  radio.write( mensagem, sizeof(mensagem) );*/
+  //delay(50);
 }
