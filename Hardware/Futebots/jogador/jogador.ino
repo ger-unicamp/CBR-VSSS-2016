@@ -1,6 +1,18 @@
-//Inclusao de biblitoecas
-#include "MsTimer2.h"
+/*
+ * Programa dos robos do futebol. Recebe informacoes enviadas por RF e aciona os motores.
+ * Atualizacao 2 nov 2017
+ */
+
+//Definicao do jogador
+//Obs.: #jogador_HW = #jogador_SW + 1
+const int jogador = 3;
+
+//Inclusao de bibliotecas
+#include <SPI.h>
 #include<EEPROM.h>
+#include "nRF24L01.h"
+#include "RF24.h"
+#include "MsTimer2.h"
 
 //Pinos da Ponte H
 #define PH_IN1 5
@@ -10,7 +22,7 @@
 
 //Pinos do RF
 #define RF_CSN 4
-#define RF_CE 5
+#define RF_CE 3
 #define RF_MO 11
 #define RF_MI 12
 #define RF_SCK 13
@@ -19,27 +31,32 @@
 #define ENC_D A6
 #define ENC_E A7
 
-//Limites inferior e superior para comparacao dos encoders
-/*
-#define limsup_dir 853
-#define limsup_esq 823
-#define liminf_dir 700//676
-#define liminf_esq 542
-*/
-
 //Variaveis globais de leitura de encoder
 int limsup_dir = 0;
 int limsup_esq = 0;
 int liminf_dir = 1023;
 int liminf_esq = 1023;
 
-//Variaveis globais
 volatile boolean estado_direita = false;
 volatile boolean estado_esquerda = false;
 volatile long int contador_direita = 0;
 volatile long int contador_esquerda = 0;
 
+//Definicoes de radio
+RF24 radio(3,4);
+const uint64_t pipe = 0xA2E8F0F0E1LL;
+
+struct Mensagem{
+  int VEL1_DIR;
+  int VEL1_ESQ;
+  int VEL2_DIR;
+  int VEL2_ESQ;
+  int VEL3_DIR;
+  int VEL3_ESQ;
+} mensagem;
+
 //Configura velocidade dos motores (para frente ou para tras) com PWM
+//motorA = motor da esquerda, motorB = motor da direita
 void configura_velocidade (int motorA, int motorB){
   if(motorA > 0){
     analogWrite(PH_IN1, motorA);
@@ -72,7 +89,15 @@ void para_motores (int motorA, int motorB){
   }
 }
 
-//Funcao para calibrar os valores-padrao de maximo e minimo a serem utilizados
+//Configura o valor para cada motor, segundo http://migre.me/wosaU
+void configura_motores (int in1, int in2, int in3, int in4){
+  digitalWrite(PH_IN1, in1);
+  digitalWrite(PH_IN2, in2);
+  digitalWrite(PH_IN3, in3);
+  digitalWrite(PH_IN4, in4);
+}
+
+//Funcao para calibrar os valores padrao de maximo e minimo a serem utilizados e salva-los na memoria EEPROM
 //Na funcao leitura_encoder()
 void calibra_encoder(){
   
@@ -80,7 +105,6 @@ void calibra_encoder(){
   //Ligamos os motores para um giro anti-horario do robo em seu proprio eixo
   configura_velocidade(100, -100);
   for(long i = 0; i < 10000; i++){
-    
     dir_agora = analogRead(ENC_D);
     
     if(dir_agora > limsup_dir)
@@ -95,16 +119,14 @@ void calibra_encoder(){
     if(esq_agora < liminf_esq)
       liminf_esq = esq_agora;
   }
+  
   //Paramos os motores
   para_motores(1,1);
-  
   delay(1000);
 
-  
   //Ligamos os motores para um giro horario do robo em seu proprio eixo
   configura_velocidade(-100, 100);
   for(long i = 0; i < 10000; i++){
-    
     dir_agora = analogRead(ENC_D);
     
     if(dir_agora > limsup_dir)
@@ -118,15 +140,14 @@ void calibra_encoder(){
       limsup_esq = esq_agora;
     if(esq_agora < liminf_esq)
       liminf_esq = esq_agora;
-
   }
   //Paramos os motores
   para_motores(1,1);
   
-  //escreve os limites na memoria EEPROM
+  //Escreve os limites na memoria EEPROM
   EEPROM.write(0, (byte) (limsup_esq >> 8));
   EEPROM.write(1, (byte) (limsup_esq & 0xff));
-    
+  
   EEPROM.write(2, (byte) (liminf_esq >> 8));
   EEPROM.write(3, (byte) (liminf_esq & 0xff));
 
@@ -138,9 +159,21 @@ void calibra_encoder(){
   
   delay(500);
   
+  //Interface serial exibe os limites encontrados - *PODE SER COMENTADO*
+  Serial.print(limsup_esq);
+  Serial.print(" ");
+  Serial.print(limsup_dir);
+  Serial.print(" ");
+  Serial.print(liminf_esq);
+  Serial.print(" ");
+  Serial.println(liminf_dir);
+  delay(1000);
+  
+  contador_esquerda = 0;
+  contador_direita = 0;
 }
 
-//recupera os limites superior e inferior da EEPPROM
+//Recupera os limites superior e inferior da EEPPROM
 void ler_limites(){
   limsup_esq = (((int) EEPROM.read(0)) << 8) + EEPROM.read(1);
   liminf_esq = (((int) EEPROM.read(2)) << 8) +EEPROM.read(3);
@@ -149,7 +182,7 @@ void ler_limites(){
   liminf_dir = (((int) EEPROM.read(6)) << 8) +EEPROM.read(7);
 }
 
-
+//RSI periodica para leitura do valor do encoder
 void leitura_encoder(){
   
   if(analogRead(ENC_D) > 0.55*limsup_dir + 0.45*liminf_dir && estado_direita == false)
@@ -176,34 +209,7 @@ void leitura_encoder(){
   
 }
 
-//Inicializacoes
-void setup(){
- pinMode(PH_IN1, OUTPUT);
- pinMode(PH_IN2, OUTPUT);
- pinMode(PH_IN3, OUTPUT);
- pinMode(PH_IN4, OUTPUT);
- 
- MsTimer2::set(1, leitura_encoder); //RSI periodica leitura_encoder com T=1ms
- MsTimer2::start(); //Habilita RSI
- 
- delay(10000);
-  calibra_encoder();
- //ler_limites();
- contador_esquerda = 0;
- contador_direita = 0;
- Serial.begin(9600);
- Serial.print(limsup_esq);
- Serial.print(" ");
- Serial.print(limsup_dir);
- Serial.print(" ");
- Serial.print(liminf_esq);
- Serial.print(" ");
- Serial.println(liminf_dir);
- delay(1000);
- contador_esquerda = 0;
- contador_direita = 0;
-}
-
+//Funcao de controle (controlador P)
 void do_pid(long vell, long velr)
 {
   double kp = 10.0;
@@ -234,7 +240,7 @@ void do_pid(long vell, long velr)
     else
       configura_velocidade(max(-255, min(255, vell + kp * erro)), velr);    
   }
-  else
+  else if(vell < 0 && velr < 0)
   {
     double erro = (vell * contador_direita - velr * contador_esquerda) / (double) (abs(velr) + abs(vell));
     
@@ -243,47 +249,99 @@ void do_pid(long vell, long velr)
     else
       configura_velocidade(max(-255, min(255, vell + kp * erro)), velr);    
   }
+  else
+  {
+    if(vell == 0 && velr == 0)
+      para_motores(1,1);
+    else
+      configura_velocidade(vell, velr);
+  }
 }
 
-void loop(){
-  //Vai para frente
-  int velr = 100, vell = 100;
+//Inicializacoes
+void setup(){
+  //Pinos da ponte H
+  pinMode(PH_IN1, OUTPUT);
+  pinMode(PH_IN2, OUTPUT);
+  pinMode(PH_IN3, OUTPUT);
+  pinMode(PH_IN4, OUTPUT);
   
+  //Configuracao da RSI
+  MsTimer2::set(1, leitura_encoder); //RSI periodica leitura_encoder com T=1ms
+  MsTimer2::start(); //Habilita RSI
+  
+  //Inicializacao do radio
+  radio.begin();
+  radio.openReadingPipe(1,pipe);
+  radio.startListening();
+  
+  //Incializacao da comunicacao serial - *PODE SER COMENTADO*, caso nao seja usado 
+  delay(500);
+  Serial.begin(9600);
+  Serial.println("Vai!");
+  
+  //Zera contadores do encoder
   contador_esquerda = 0;
   contador_direita = 0;
   
-  for(int i = 0; i < 100; i++)
-  {
-    if(i < 5)
-      do_pid(vell * (0.2 * (i+1)), velr * (0.2 * (i+1)));
-    else
-      do_pid(vell, velr);
-    delay(10);
-  }
-  
-  //Para
-  para_motores(1,1);
-  delay(1000);
-  configura_velocidade(0,0);
-  delay(1000);
-    
-  //Vai para tras
-  velr = -100, vell = -100;
-  contador_esquerda = 0;
-  contador_direita = 0;
+  //Obtem dados de limites para encoder atraves de calibracao ou leitura da EEPROM
+  calibra_encoder();
+  //ler_limites();
+ 
+}
 
-  for(int i = 0; i < 100; i++)
-  {
-    if(i < 5)
-      do_pid(vell * (0.2 * (i+1)), velr * (0.2 * (i+1)));
-    else
-      do_pid(vell, velr);
-    delay(10);
+int veld = 0;
+int vele = 0;
+int nova_veld, nova_vele;
+
+void loop(){  
+  //Recebe informacoes do radio
+  if(radio.available()){
+    bool done = false;
+    while (!done){
+      done = radio.read(&mensagem, sizeof(mensagem));
+      if(jogador == 1){
+        nova_veld = mensagem.VEL1_DIR;
+        nova_vele = mensagem.VEL1_ESQ;
+      }
+      else if(jogador == 2){
+        nova_veld = mensagem.VEL2_DIR;
+        nova_vele = mensagem.VEL2_ESQ;
+      }
+      else if(jogador == 3){
+        nova_veld = mensagem.VEL3_DIR;
+        nova_vele = mensagem.VEL3_ESQ;
+      }
+    
+    //Escreve as velocidades recebidas no serial
+    //Serial.println(mensagem.VEL1_DIR);
+    //Serial.println(mensagem.VEL1_ESQ);
+    //Serial.println(mensagem.VEL2_DIR);
+    //Serial.println(mensagem.VEL2_ESQ);
+    //Serial.println(mensagem.VEL3_DIR);
+    //Serial.println(mensagem.VEL3_ESQ);
+    //Serial.println(nova_veld);
+    //Serial.println(nova_vele);
+    }
   }
   
-  //Para
-  para_motores(1,1);
-  delay(1000);
-  configura_velocidade(0,0);
-  delay(1000);
+  //Se radio nao funciona
+  else{
+    //Serial.println("Rádio não disponível");
+  }
+ 
+  
+  
+  if((abs(nova_veld - veld) > 0) || (abs(nova_veld - veld) > 0)){
+    veld = nova_veld;
+    vele = nova_vele;
+    
+    contador_direita = 0;
+    contador_esquerda = 0;
+  }
+  
+  Serial.println(veld);
+  Serial.println(vele);
+  do_pid(vele,veld);
+  
 }
