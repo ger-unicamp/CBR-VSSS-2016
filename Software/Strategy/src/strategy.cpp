@@ -62,15 +62,23 @@ int id = 0;
 
 void Strategy::calc_strategy(){
 
-	for(int i = 0; i < 3; i++)
+/*	for(int i = 3; i < 6; i++)
 	{
-		commands[i].right = 100;
-		commands[i].left = 100;
-/*		if((180 - state.robots[i+ 3].pose.theta) > 0)
-			commands[i].right = 40 - (180 - state.robots[i+ 3].pose.theta) * 0.2;
-		else	
-			commands[i].left = 40 + (180 - state.robots[i + 3].pose.theta) * 0.2;
-*/	}
+		if(state.robots[i].pose.x > 85)
+		{
+			commands[i-3].right = 50;
+			commands[i-3].left = 50;			
+		}
+		else
+		{			
+			commands[i-3].right = -50;
+			commands[i-3].left = -50;			
+		}
+	}
+*/
+
+	btVector3 obj(0,0,90);
+	commands[0] = acertar_angulo(state.robots[3].pose, obj );
 /*	if(id % 2 == 0)
 	{
 		for(int i = 0; i < 3; i++)
@@ -83,6 +91,41 @@ void Strategy::calc_strategy(){
 	for(int i = 0; i < 6; i++)
 		state.robots[i].pose.show();	
 }
+
+
+
+common::Command Strategy::acertar_angulo(btVector3 act, btVector3 goal){
+	Command cmd;
+
+	float cw_diff = 360 + act.z - goal.z;
+	if(cw_diff > 360)
+		cw_diff -= 360;
+
+	float ccw_diff = 360 + goal.z - act.z;
+	if(ccw_diff > 360)
+		ccw_diff -= 360;
+
+	if(cw_diff < 45 || ccw_diff < 45)
+	{
+		cmd.left = 0;
+		cmd.right = 0;
+		return cmd;
+	}
+
+	if(cw_diff < ccw_diff)
+	{
+		cmd.left = -(30 + 50.0*(cw_diff / 360));
+		cmd.right = (30 + 50.0*(cw_diff / 360));
+	}
+	else
+	{
+		cmd.left = (30 + 50.0*(ccw_diff / 360));
+		cmd.right = -(30 + 50.0*(ccw_diff / 360));
+	}
+
+	return cmd;
+}
+
 
 
 

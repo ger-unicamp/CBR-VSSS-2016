@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 			 break;
 		}
 
-		set_border_manually(frame, Point2f(98,50), Point2f(548,48), Point2f(539,446), Point2f(95,425));
+		set_border_manually(frame, Point2f(85,25), Point2f(548,22), Point2f(535,433), Point2f(83,414));
 		Mat transformed_frame = transform(frame);
 	
 		if(unset)
@@ -106,6 +106,8 @@ int main(int argc, char* argv[])
 				fieldState.yellow_dir[type] = (M_PI + atan2(secondary_circles[type][index].center.y - primary_circles[i].center.y, secondary_circles[type][index].center.x - primary_circles[i].center.x)) * (180 / M_PI); 
 			}
 
+	        circle(transformed_frame, primary_circles[i].center, 4, Scalar(255, 255, 255), -1);
+	        line(transformed_frame, primary_circles[i].center, primary_circles[i].center + 2*(secondary_circles[type][index].center - primary_circles[i].center), Scalar(255, 255, 255), 2);
 			printf("\nx_robo%d=%.1f, y_robo%d=%.1f\n", type, primary_circles[i].center.x, type, primary_circles[i].center.y);
 			printf("robo%d_dir: %.1lf %.1lf\n", type, secondary_circles[type][index].center.x - primary_circles[i].center.x, secondary_circles[type][index].center.y - primary_circles[i].center.y);
 			printf("robo%d_dir: %.1lf\n", type, (M_PI + atan2(secondary_circles[type][index].center.y - primary_circles[i].center.y, secondary_circles[type][index].center.x - primary_circles[i].center.x)) * (180/M_PI));
@@ -125,12 +127,15 @@ int main(int argc, char* argv[])
 				fieldState.blue_dir[i] = 0;
 			}
 
+	        circle(transformed_frame, opponent_circles[i].center, 4, Scalar(255, 255, 255), -1);
 			printf("\nx_opponent%d=%.1f, y_opponent%d=%.1f\n", i, opponent_circles[i].center.x, i, opponent_circles[i].center.y);
 		}
+
 
 		sort(ball_circles.begin(), ball_circles.end());
 		if(ball_circles.size())
 		{
+	        circle(transformed_frame, ball_circles[0].center, 4, Scalar(255, 255, 255), -1);
 			fieldState.ball_pos = ball_circles[0].center;
 			printf("\nx_ball=%.1f, y_ball=%.1f\n", ball_circles[0].center.x, ball_circles[0].center.y);
 		}

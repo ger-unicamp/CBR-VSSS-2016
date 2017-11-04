@@ -38,7 +38,7 @@ SerialSender::  ~SerialSender()
 void SerialSender::   send(int vel_1r, int vel_1l, int vel_2r, int vel_2l, int vel_3r, int vel_3l)
 {
     //Dados a serem escritos
-    fprintf(file, "#%d,%d,%d,%d,%d,%d\n", vel_1r, vel_1l, vel_2r, vel_2l, vel_3r, vel_3l);
+    fprintf(file, "[%d,%d,%d,%d,%d,%d]\n", vel_1r, vel_1l, vel_2r, vel_2l, vel_3r, vel_3l);
 	printf("Enviou %d %d %d %d %d %d\n", vel_1r, vel_1l, vel_2r, vel_2l, vel_3r, vel_3l);
 }
 
