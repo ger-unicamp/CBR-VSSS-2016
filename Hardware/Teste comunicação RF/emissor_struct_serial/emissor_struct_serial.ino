@@ -20,7 +20,19 @@ struct Mensagem {
   int vel2_esq;
   int vel3_dir;
   int vel3_esq;
+  int checksum;
 } mensagem;
+
+unsigned int hashstring(struct Mensagem msg)
+{
+  unsigned char *str = (unsigned char *) &msg;
+
+  unsigned int hash = 5381;
+  for(int i = 0; i < 12; i++)
+    hash = ((hash << 5) + hash) + *(str + i); // hash * 33 + c
+
+  return hash;
+}
 
 RF24 radio(CE,CSN);
 
@@ -49,10 +61,22 @@ void loop(void)
 {
   while(Serial.available()){
     char c = Serial.read();
-    if(c == '#'){
+    if(c == '['){
       i = 0;
       //Serial.println("#");
       instrucoes[0] = "";
+    }
+    else if(c == ']')
+    {
+      mensagem.vel1_dir = instrucoes[0].toInt();
+      mensagem.vel1_esq = instrucoes[1].toInt();
+      mensagem.vel2_dir = instrucoes[2].toInt();
+      mensagem.vel2_esq = instrucoes[3].toInt();
+      mensagem.vel3_dir = instrucoes[4].toInt();
+      mensagem.vel3_esq = instrucoes[5].toInt();
+      mensagem.checksum = hashstring(mensagem);
+      
+      radio.write(&mensagem, sizeof(mensagem));
     }
     else{
       if(c == ','){
@@ -65,16 +89,8 @@ void loop(void)
     }
   }
   
-  mensagem.vel1_dir = instrucoes[0].toInt();
-  mensagem.vel1_esq = instrucoes[1].toInt();
-  mensagem.vel2_dir = instrucoes[2].toInt();
-  mensagem.vel2_esq = instrucoes[3].toInt();
-  mensagem.vel3_dir = instrucoes[4].toInt();
-  mensagem.vel3_esq = instrucoes[5].toInt();
-  
-  radio.write(&mensagem, sizeof(mensagem));
-  //Serial.println("Enviou mensagem");
-/*  Serial.print(mensagem.vel1_dir);
+/*  Serial.println("Enviou mensagem");
+  Serial.print(mensagem.vel1_dir);
   Serial.print(" ");
   Serial.print(mensagem.vel1_esq);
   Serial.print(" ");
@@ -84,6 +100,8 @@ void loop(void)
   Serial.print(" ");
   Serial.print(mensagem.vel3_dir);
   Serial.print(" ");
-  Serial.println(mensagem.vel3_esq);*/
-  delay(5);
+  Serial.print(mensagem.vel3_esq);
+  Serial.print(" ");
+  Serial.println(mensagem.checksum);
+*/
 }
