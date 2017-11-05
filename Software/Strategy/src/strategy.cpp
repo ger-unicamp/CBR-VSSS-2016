@@ -76,6 +76,8 @@ void Strategy::calc_strategy(){
 		}
 	}
 */
+
+	/*
 	btVector3 obj(85,65, atan2(state.ball.y - state.robots[3].pose.y, state.ball.x - state.robots[3].pose.x) * 180.0 / M_PI + 180);
 
 	float cw_diff = 360 + state.robots[3].pose.z - obj.z;
@@ -95,27 +97,27 @@ void Strategy::calc_strategy(){
 		if(id % 5 == 0)
 			commands[0] = acertar_angulo(state.robots[3].pose, obj);
 
-		if(min(cw_diff, ccw_diff) > 60)
+		if(min(cw_diff, ccw_diff) > 20)
 		{
-			if(id % 5 >= 2)
+			if(id % 5 >= 3)
 				commands[0].left = commands[0].right = 0;		
 		}
 		else
 		{
-			if(id % 5 >= 1)
+			if(id % 5 >= 2)
 				commands[0].left = commands[0].right = 0;		
 		}
 	}
 
+*/
+//	commands[1].left = commands[1].right = commands[2].left = commands[2].right = commands[0].left = commands[0].right  = 50;
 
-	commands[1].left = commands[1].right = commands[2].left = commands[2].right = commands[0].left = commands[0].right = 50;
 
 
-
-//	if(id % 50 == 0)
-//		commands[0] = circ_arc(state.robots[3].pose, state.ball);
-//	else if(id % 50 > 25)
-//		commands[0].left = commands[0].right = 0;
+	if(id % 30 == 0)
+		commands[0] = circ_arc(state.robots[3].pose, state.ball);
+	else if(id % 30 > 25)
+		commands[0].left = commands[0].right = 0;
 /*	if(id % 2 == 0)
 	{
 		for(int i = 0; i < 3; i++)
@@ -172,12 +174,28 @@ common::Command Strategy::circ_arc(btVector3 act, btVector3 goal){
 		cmd.left = 40;
 		cmd.right = ((radius + 3.75) / (radius - 3.75)) * cmd.left + 0.5;
 		cmd.right = (cmd.right - cmd.left) + cmd.left;
+
+		btVector3 a = goal - act;
+		btVector3 b = center - act;
+		if(a.x*b.y - a.y*b.x > 0)
+		{
+			cmd.left *= -1;
+			cmd.right *= -1;
+		}
 	}
 	else
 	{
 		cmd.right = 40;
 		cmd.left = ((radius + 3.75) / (radius - 3.75)) * cmd.right + 0.5;
 		cmd.left = (cmd.left - cmd.right) + cmd.right;
+
+		btVector3 a = goal - act;
+		btVector3 b = center - act;
+		if(a.x*b.y - a.y*b.x < 0)
+		{
+			cmd.left *= -1;
+			cmd.right *= -1;
+		}
 	}
 
 	return cmd;
