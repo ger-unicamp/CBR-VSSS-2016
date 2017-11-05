@@ -76,9 +76,46 @@ void Strategy::calc_strategy(){
 		}
 	}
 */
+	btVector3 obj(85,65, atan2(state.ball.y - state.robots[3].pose.y, state.ball.x - state.robots[3].pose.x) * 180.0 / M_PI + 180);
 
-	btVector3 obj(0,0,90);
-	commands[0] = acertar_angulo(state.robots[3].pose, obj );
+	float cw_diff = 360 + state.robots[3].pose.z - obj.z;
+	if(cw_diff > 360)
+		cw_diff -= 360;
+
+	float ccw_diff = 360 + obj.z - state.robots[3].pose.z;
+	if(ccw_diff > 360)
+		ccw_diff -= 360;
+
+	double psi = min(45.0, max(10.0, 0.5 * distancePoint(state.robots[3].pose, state.ball)));
+
+	if((cw_diff < psi || ccw_diff < psi) && commands[0].left == commands[0].right)
+		commands[0].left = commands[0].right = 40;
+	else
+	{
+		if(id % 5 == 0)
+			commands[0] = acertar_angulo(state.robots[3].pose, obj);
+
+		if(min(cw_diff, ccw_diff) > 60)
+		{
+			if(id % 5 >= 2)
+				commands[0].left = commands[0].right = 0;		
+		}
+		else
+		{
+			if(id % 5 >= 1)
+				commands[0].left = commands[0].right = 0;		
+		}
+	}
+
+
+	commands[1].left = commands[1].right = commands[2].left = commands[2].right = commands[0].left = commands[0].right = 50;
+
+
+
+//	if(id % 50 == 0)
+//		commands[0] = circ_arc(state.robots[3].pose, state.ball);
+//	else if(id % 50 > 25)
+//		commands[0].left = commands[0].right = 0;
 /*	if(id % 2 == 0)
 	{
 		for(int i = 0; i < 3; i++)
@@ -87,15 +124,69 @@ void Strategy::calc_strategy(){
 			commands[i].left = 0;
 		}
 	}
-*/	printf("***** %d\n", id++);
+*/
+	id++;
+	printf("***** %d\n", id++);
+	state.ball.show();
 	for(int i = 0; i < 6; i++)
 		state.robots[i].pose.show();	
 }
 
+btVector3 ortogonal(btVector3 v)
+{
+	btVector3 retv(-v.y, v.x);
+	return retv;
+}
+
+
+common::Command Strategy::circ_arc(btVector3 act, btVector3 goal){
+
+
+	btVector3 vec_dir_robot(-cos(act.z * M_PI / 180.0), -sin(act.z * M_PI / 180.0));
+
+	btVector3 pmid = (act + goal) * 0.5;
+
+	btVector3 vec_dir_ball = goal - pmid;
+	btVector3 ort_vec_dir_robot = ortogonal(vec_dir_robot);
+	btVector3 ort_vec_dir_ball = ortogonal(goal - pmid);
+
+	btVector3 p1 = act;
+	btVector3 v1 = ort_vec_dir_robot;
+	btVector3 p2 = pmid;
+	btVector3 v2 = ort_vec_dir_ball;
+
+	btVector3 prime = p1 - p2;
+
+	double t2 = (prime.y*v1.x - prime.x*v1.y) / (v1.x*v2.y - v1.y*v2.x + 1e-8);
+
+	btVector3 center = p2 + v2*t2;
+
+	center.show();	
+	double radius = distancePoint(center, act);
+
+	Command cmd;
+
+	if(vec_dir_robot.x*vec_dir_ball.y - vec_dir_ball.x*vec_dir_robot.y < 0)
+	{
+		// cmd.right > cmd.left
+		cmd.left = 40;
+		cmd.right = ((radius + 3.75) / (radius - 3.75)) * cmd.left + 0.5;
+		cmd.right = (cmd.right - cmd.left) + cmd.left;
+	}
+	else
+	{
+		cmd.right = 40;
+		cmd.left = ((radius + 3.75) / (radius - 3.75)) * cmd.right + 0.5;
+		cmd.left = (cmd.left - cmd.right) + cmd.right;
+	}
+
+	return cmd;
+}
 
 
 common::Command Strategy::acertar_angulo(btVector3 act, btVector3 goal){
 	Command cmd;
+	double psi = min(45.0, max(10.0, 0.5 * distancePoint(state.robots[3].pose, state.ball)));
 
 	float cw_diff = 360 + act.z - goal.z;
 	if(cw_diff > 360)
@@ -105,7 +196,7 @@ common::Command Strategy::acertar_angulo(btVector3 act, btVector3 goal){
 	if(ccw_diff > 360)
 		ccw_diff -= 360;
 
-	if(cw_diff < 45 || ccw_diff < 45)
+	if(cw_diff < psi || ccw_diff < psi)
 	{
 		cmd.left = 0;
 		cmd.right = 0;
@@ -114,17 +205,19 @@ common::Command Strategy::acertar_angulo(btVector3 act, btVector3 goal){
 
 	if(cw_diff < ccw_diff)
 	{
-		cmd.left = -(30 + 50.0*(cw_diff / 360));
-		cmd.right = (30 + 50.0*(cw_diff / 360));
+		cmd.left = -40;
+		cmd.right = 40;
 	}
 	else
 	{
-		cmd.left = (30 + 50.0*(ccw_diff / 360));
-		cmd.right = -(30 + 50.0*(ccw_diff / 360));
+		cmd.left = 40;
+		cmd.right = -40;
 	}
 
 	return cmd;
 }
+
+
 
 
 

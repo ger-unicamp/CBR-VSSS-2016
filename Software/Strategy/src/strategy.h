@@ -48,6 +48,7 @@ public:
 	btVector3 gradiente(btVector3 pos, int meu_robo);
 	double potencial(btVector3 pos, int meu_robo);
 	common::Command calc_cmd_to(btVector3 init, btVector3 final, float distance_to_stop = 10.0);
+	common::Command circ_arc(btVector3 act, btVector3 goal);
 };
 
 #endif // _STRATEGY_H_

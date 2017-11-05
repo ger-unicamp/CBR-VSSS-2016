@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 		if(ball_circles.size())
 		{
 	        circle(transformed_frame, ball_circles[0].center, 4, Scalar(255, 255, 255), -1);
-			fieldState.ball_pos = ball_circles[0].center;
+			fieldState.ball_pos = Point2f((150.0 * ball_circles[0].center.x / dWidth) + 10, (130.0 * ball_circles[0].center.y / dHeight));
 			printf("\nx_ball=%.1f, y_ball=%.1f\n", ball_circles[0].center.x, ball_circles[0].center.y);
 		}
 
