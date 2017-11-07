@@ -1,13 +1,13 @@
 #include "ger_vsss.hpp"
 #include <math.h>
 
-const color_range ball_color(3, 15, 201, 255, 243, 255);
-const color_range blue(95, 124, 147, 255, 194, 255);
-const color_range yellow(20, 35, 121, 210, 214, 255);
-const color_range green(65, 91, 110, 190, 109, 145);
-const color_range white(0, 255, 0, 170, 180, 255);
-const color_range red(160, 1, 119, 220, 129, 255);
-const color_range purple(122, 151, 65, 120, 200, 255);
+const color_range ball_color(3, 15, 201, 255, 243, 255); //ok 
+const color_range blue(95, 124, 147, 255, 95, 255); // ok
+const color_range yellow(13, 89, 233, 255, 142, 255); // ok 
+const color_range green(48, 98, 134, 255, 71, 135); // ok
+const color_range white(0, 180, 0, 69, 97, 255); // maomeno
+const color_range red(0, 17, 207, 255, 177, 245); // ok
+const color_range purple(122, 151, 83, 255, 124, 255); // ok
 // finds one of the vertices of the field (depending on the parameters)
 // used only by the transform function
 
