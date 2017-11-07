@@ -36,6 +36,14 @@ int main(int argc, char* argv[])
     namedWindow( "Control", WINDOW_AUTOSIZE );
 
     Point2i p[4];
+    p[0].x = 89;
+    p[0].y = 2;
+    p[1].x = 597;
+    p[1].y = 30;
+    p[2].x = 567;
+    p[2].y = 480;
+    p[3].x = 55;
+    p[3].y = 455;
     // P0 is the superior left corner
     // P1, P2 and P3 continue clockwise
     createTrackbar("P0-X", "Control", &p[0].x, dWidth);
