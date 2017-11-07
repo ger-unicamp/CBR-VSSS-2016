@@ -56,12 +56,12 @@ int main(int argc, char* argv[])
 			 break;
 		}
 
-		set_border_manually(frame, Point2f(85,25), Point2f(548,22), Point2f(535,433), Point2f(83,414));
+		set_border_manually(frame, Point2f(89, 2), Point2f(597, 30), Point2f(567, 480), Point2f(55, 455));
 		Mat transformed_frame = transform(frame);
 	
 		if(unset)
 		{
-			set_border_manually(frame, Point2f(111,47), Point2f(566,10), Point2f(579, 415), Point2f(135, 421));
+            set_border_manually(frame, Point2f(89, 2), Point2f(597, 30), Point2f(567, 480), Point2f(55, 455));
 			unset = false;
 		}
 
