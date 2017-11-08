@@ -49,6 +49,7 @@ public:
 	double potencial(btVector3 pos, int meu_robo);
 	common::Command calc_cmd_to(btVector3 init, btVector3 final, float distance_to_stop = 10.0);
 	common::Command circ_arc(btVector3 act, btVector3 goal);
+	common::Command travel_to(btVector3 act, btVector3 obj);
 };
 
 #endif // _STRATEGY_H_

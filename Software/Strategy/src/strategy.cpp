@@ -61,8 +61,15 @@ void Strategy::loop(){
 // Nosso gol sempre será o lado esquerdo da tela
 
 int id = 0;
+int indo_pro_gol = 0;
+queue<btVector3> prev_ball_pos;
 
 void Strategy::calc_strategy(){
+
+	prev_ball_pos.push(state.ball);
+	if(prev_ball_pos.size() > 5)
+		prev_ball_pos.pop();
+
 
 /*	for(int i = 3; i < 6; i++)
 	{
@@ -78,9 +85,34 @@ void Strategy::calc_strategy(){
 		}
 	}
 */
+	btVector3 gol_adversario(140, 65);
 
-	/*
-	btVector3 obj(85,65, atan2(state.ball.y - state.robots[3].pose.y, state.ball.x - state.robots[3].pose.x) * 180.0 / M_PI + 180);
+	btVector3 final_atacante = ((state.ball - gol_adversario) * ((6.0 + distancePoint(state.ball, gol_adversario)) / distancePoint(state.ball, gol_adversario))) + gol_adversario;
+	final_atacante.x = min(max((double) final_atacante.x, 15.0), 135.0);
+	final_atacante.y = min(max((double) final_atacante.y, 6.0), 124.0);
+
+	commands[0] = travel_to(state.robots[3].pose, final_atacante);
+
+	if(distancePoint(state.robots[3].pose, state.ball) > 10)
+		indo_pro_gol = 0;
+
+	if(distancePoint(state.robots[3].pose, final_atacante) < 5 || indo_pro_gol)
+	{
+		commands[0].left = commands[0].right = 0;
+		commands[0] = travel_to(state.robots[3].pose, state.ball);
+		indo_pro_gol = 1;
+	}
+
+
+	btVector3 final_goleiro(17, max(47.0, min(83.0, (double) futuro(state.ball).y)));
+	if(id % 10 == 0 && distancePoint(final_goleiro, state.robots[5].pose) > 3)
+		commands[2] = circ_arc(state.robots[5].pose, final_goleiro);
+	else if(id % 10 > 6)
+		commands[2].left = commands[2].right = 0;
+
+
+	
+/*	btVector3 obj(85,65, atan2(state.ball.y - state.robots[3].pose.y, state.ball.x - state.robots[3].pose.x) * 180.0 / M_PI + 180);
 
 	float cw_diff = 360 + state.robots[3].pose.z - obj.z;
 	if(cw_diff > 360)
@@ -110,16 +142,18 @@ void Strategy::calc_strategy(){
 				commands[0].left = commands[0].right = 0;		
 		}
 	}
-
 */
+
 //	commands[1].left = commands[1].right = commands[2].left = commands[2].right = commands[0].left = commands[0].right  = 50;
 
 
 
-	if(id % 30 == 0)
+/*	if(id % 20 == 0)
 		commands[0] = circ_arc(state.robots[3].pose, state.ball);
-	else if(id % 30 > 25)
+	else if(id % 20 > 16)
 		commands[0].left = commands[0].right = 0;
+*/
+
 /*	if(id % 2 == 0)
 	{
 		for(int i = 0; i < 3; i++)
@@ -129,6 +163,7 @@ void Strategy::calc_strategy(){
 		}
 	}
 */
+
 
 	id++;
 	printf("***** %d\n", id++);
@@ -161,6 +196,58 @@ void Strategy::calc_strategy(){
 	for(int i = 0; i < 6; i++)
 		state.robots[i].pose.show();	
 }
+
+
+btVector3 Strategy::futuro(btVector3 pos)
+{
+	return prev_ball_pos.front() + (pos - prev_ball_pos.front())*4;
+}
+
+
+common::Command Strategy::travel_to(btVector3 act, btVector3 obj)
+{
+	common::Command cmd;
+
+	obj.z = atan2(obj.y - act.y, obj.x - act.x) * 180.0 / M_PI + 180;
+
+	float cw_diff = 360 + act.z - obj.z;
+	if(cw_diff > 360)
+		cw_diff -= 360;
+
+	float ccw_diff = 360 + obj.z - act.z;
+	if(ccw_diff > 360)
+		ccw_diff -= 360;
+
+	double psi = min(45.0, max(10.0, 0.5 * distancePoint(act, obj)));
+
+	if((cw_diff < psi || ccw_diff < psi))
+		cmd.left = cmd.right = 40;
+
+	else
+	{
+		if(id % 5 == 0)
+		{
+			cmd = acertar_angulo(act, obj);
+		}
+
+		if(min(cw_diff, ccw_diff) > 25 && id % 5 >= 3)
+		{
+			cmd.left = cmd.right = 0;		
+		}
+		else if(id % 5 >= 2)
+		{
+			cmd.left = cmd.right = 0;		
+		}
+		else
+		{
+			cmd = acertar_angulo(act, obj);
+		}
+
+	}
+
+	return cmd;
+}
+
 
 btVector3 ortogonal(btVector3 v)
 {
@@ -232,7 +319,7 @@ common::Command Strategy::circ_arc(btVector3 act, btVector3 goal){
 
 common::Command Strategy::acertar_angulo(btVector3 act, btVector3 goal){
 	Command cmd;
-	double psi = min(45.0, max(10.0, 0.5 * distancePoint(state.robots[3].pose, state.ball)));
+	double psi = min(45.0, max(10.0, 0.5 * distancePoint(act, goal)));
 
 	float cw_diff = 360 + act.z - goal.z;
 	if(cw_diff > 360)
@@ -280,13 +367,9 @@ btVector3 gol_adversario(160, 65, 0);
 time_t sec;
 btVector3 prev_pos;
 
-queue<btVector3> prev_ball_pos;
 
 void Strategy::calc_strategy(){
 
-	prev_ball_pos.push(state.ball);
-	if(prev_ball_pos.size() > 5)
-		prev_ball_pos.pop();
 
 	int atacante = 5;
 
