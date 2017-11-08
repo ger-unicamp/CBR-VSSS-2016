@@ -58,6 +58,8 @@ void Strategy::loop(){
 	}
 }
 
+// Nosso gol sempre será o lado esquerdo da tela
+
 int id = 0;
 
 void Strategy::calc_strategy(){
@@ -127,8 +129,34 @@ void Strategy::calc_strategy(){
 		}
 	}
 */
+
 	id++;
 	printf("***** %d\n", id++);
+
+	if(state.ball.x + state.ball.y == 0)
+	{
+		commands[1].left = commands[1].right = commands[2].left = commands[2].right = commands[0].left = commands[0].right = 0;
+		printf("Ball lost\n");
+	}
+
+	if(state.robots[3].pose.x + state.robots[3].pose.y == 0)
+	{
+		commands[0].left = commands[0].right = 0;
+		printf("Robot 0 lost\n");
+	}
+
+	if(state.robots[4].pose.x + state.robots[4].pose.y == 0)
+	{
+		commands[1].left = commands[1].right = 0;
+		printf("Robot 1 lost\n");
+	}
+
+	if(state.robots[5].pose.x + state.robots[5].pose.y == 0)
+	{
+		commands[2].left = commands[2].right = 0;
+		printf("Robot 2 lost\n");
+	}
+
 	state.ball.show();
 	for(int i = 0; i < 6; i++)
 		state.robots[i].pose.show();	

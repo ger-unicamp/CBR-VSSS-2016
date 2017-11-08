@@ -13,8 +13,8 @@ int main(int argc, char* argv[])
 {	
 	// if did not receive expected number of arguments, prints usage instructions
 	// the user must send the cam number as a parameter
-	if(argc != 3) {
-		cout << "Usage: " << argv[0] << " <cam number>" << " <primary_color>"<<  endl;
+	if(argc != 4) {
+		cout << "Usage: " << argv[0] << " <cam number>" << " <primary_color> "<< "<flip>"<<  endl;
 		return -1;
 	}
 
@@ -43,6 +43,7 @@ int main(int argc, char* argv[])
 
 	bool unset = false;
 
+	bool play = false;
 
 	while (1)
 	{
@@ -59,10 +60,12 @@ int main(int argc, char* argv[])
 		set_border_manually(frame, Point2f(89, 2), Point2f(597, 30), Point2f(567, 480), Point2f(55, 455));
 		Mat transformed_frame = transform(frame);
 	
-		if(unset)
+		// Nosso gol sempre será o lado esquerdo da tela
+		if(argv[3][0] == 'y')
 		{
-            set_border_manually(frame, Point2f(89, 2), Point2f(597, 30), Point2f(567, 480), Point2f(55, 455));
-			unset = false;
+			Mat tmp;
+			flip(transformed_frame, tmp, -1);
+			transformed_frame = tmp;
 		}
 
 		State fieldState = State(); // creates a new state (all set to zero)
@@ -140,12 +143,28 @@ int main(int argc, char* argv[])
 			printf("\nx_ball=%.1f, y_ball=%.1f\n", ball_circles[0].center.x, ball_circles[0].center.y);
 		}
 
+		if(play == false) // pretends the ball is not there so players will stop
+			fieldState.ball_pos = Point2f(0, 0);
+
 		// sends data to the strategy code
 		interface.sendToStrategy(fieldState);
 
 		imshow("MyVideo_transformed", transformed_frame); //show the frame in "MyVideo_transformed" window
 
-		if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
+		int keypress = waitKey(30);
+
+		if(keypress == 's') // press s to start
+		{
+			play = true;
+			cout << "Game is starting" << endl;
+		}
+		if(keypress == 'p') // press p to pause
+		{
+			play = false;
+			cout << "Game is paused" << endl;
+		}
+
+		if (keypress == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
 		{
 			cout << "esc key is pressed by user" << endl;
 			break; 
