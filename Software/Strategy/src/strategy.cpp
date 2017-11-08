@@ -87,8 +87,8 @@ void Strategy::calc_strategy(){
 */
 	btVector3 gol_adversario(140, 65);
 
-	btVector3 final_atacante = ((state.ball - gol_adversario) * ((6.0 + distancePoint(state.ball, gol_adversario)) / distancePoint(state.ball, gol_adversario))) + gol_adversario;
-	final_atacante.x = min(max((double) final_atacante.x, 15.0), 135.0);
+	btVector3 final_atacante = ((state.ball - gol_adversario) * ((8.0 + distancePoint(state.ball, gol_adversario)) / distancePoint(state.ball, gol_adversario))) + gol_adversario;
+	final_atacante.x = min(max((double) final_atacante.x, 30.0), 135.0);
 	final_atacante.y = min(max((double) final_atacante.y, 6.0), 124.0);
 
 	/*commands[0] = travel_to(state.robots[3].pose, final_atacante);
@@ -122,26 +122,30 @@ void Strategy::calc_strategy(){
 		final_atacante.x = state.robots[3].pose.x - 15.0;
 	}*/
 
-	if(distancePoint(state.robots[3].pose, state.ball) > 10)
-		indo_pro_gol = 0;
-
-	if(distancePoint(state.robots[3].pose, final_atacante) < 5 || indo_pro_gol)
-	{
-		commands[0].left = commands[0].right = 0;
-		commands[0] = travel_to(state.robots[3].pose, state.ball);
-		indo_pro_gol = 1;
-	}
-
 	if(distancePoint(state.robots[3].pose, final_atacante) < 25){
 		commands[0] = travel_to(state.robots[3].pose, final_atacante);
 	}
 	else{
-		commands[0] = circ_arc(state.robots[3].pose, final_atacante);
+		if(id % 25 == 0)
+			commands[0] = circ_arc(state.robots[3].pose, final_atacante);
+		else if(id % 25 > 22)
+			commands[0].left = commands[0].right = 0;
+
+//		commands[0] = circ_arc(state.robots[3].pose, final_atacante);
+	}
+
+	if(distancePoint(state.robots[3].pose, state.ball) > 15)
+		indo_pro_gol = 0;
+
+	if(distancePoint(state.robots[3].pose, final_atacante) < 5 || indo_pro_gol)
+	{
+		commands[0] = travel_to(state.robots[3].pose, state.ball);
+		indo_pro_gol = 1;
 	}
 
 	//Robo 2: zaga
 	btVector3 final_zaga(60, max(10.0, min(120.0, (double) futuro(state.ball).y)));
-	if(id % 10 == 0 && distancePoint(final_zaga, state.robots[5].pose) > 3)
+	if(id % 10 == 0 && distancePoint(final_zaga, state.robots[4].pose) > 3)
 		commands[1] = circ_arc(state.robots[4].pose, final_zaga);
 	else if(id % 10 > 6)
 		commands[1].left = commands[1].right = 0;
@@ -153,6 +157,57 @@ void Strategy::calc_strategy(){
 	else if(id % 10 > 6)
 		commands[2].left = commands[2].right = 0;
 
+
+	//Robo 3: goleiro vai goleirar
+	//Se estiver no eixo do gol
+	/*if(abs(state.robots[5].pose.x - 17.0) < 3){
+		printf("estou no eixo do gol\n");
+
+		if(abs(state.robots[5].pose.z - 270) > 10)
+			commands[2] = acertar_angulo(state.robots[5].pose, btVector3(1, 1, 270)); //Alinha com 90º
+		//Se estiver mais longe que 3 da bola no eixo y
+		else if(abs(state.robots[5].pose.y - state.ball.y) > 3){
+			printf("nao estou alinhado com a bola\n");
+			//Segue a bola
+			float velocidade = (state.robots[5].pose.y - state.ball.y > 0) ? -40 : 40;
+			commands[2].left = commands[2].right = velocidade;
+		}
+		//Se estiver alinhado com a bola
+		else{
+			printf("estou alinhado com a bola\n");
+			if(state.robots[5].pose.y < 25){
+				printf("giro horario\n");
+				//gira horario
+				commands[2].left = 40;
+				commands[2].right = -40;
+			}
+			else if(state.robots[5].pose.y > 95)
+			{
+				printf("giro anti-horario\n");
+				//gira anti-horario
+				commands[2].left = -40;
+				commands[2].right = 40;
+			}
+			else
+			{
+				commands[2].left = 0;
+				commands[2].right = 0;
+			}
+			//else sucesso!
+		}
+
+	}
+	//Se nao estiver no eixo do gol
+	else{
+		printf("nao estou no eixo do gol\n");
+		commands[2] = acertar_angulo(state.robots[5].pose, btVector3(1, 1, 180)); //Alinha com 0º
+		//Se estiver mais longe que 3 da bola no eixo x
+		if(abs(state.robots[5].pose.x - state.ball.x) > 3){
+			//Segue a bola
+			float velocidade = (state.robots[5].pose.x - 17 > 0) ? -40 : 40;
+			commands[2].left = commands[2].right = velocidade;
+		}
+	}*/
 	
 /*	btVector3 obj(85,65, atan2(state.ball.y - state.robots[3].pose.y, state.ball.x - state.robots[3].pose.x) * 180.0 / M_PI + 180);
 
@@ -267,24 +322,18 @@ common::Command Strategy::travel_to(btVector3 act, btVector3 obj)
 
 	else
 	{
-		if(id % 5 == 0)
-		{
-			cmd = acertar_angulo(act, obj);
-		}
+		cmd = acertar_angulo(act, obj);
 
-		if(min(cw_diff, ccw_diff) > 25 && id % 5 >= 3)
+		if(min(cw_diff, ccw_diff) > 25)
 		{
-			cmd.left = cmd.right = 0;		
+			if(id % 5 >= 2)
+				cmd.left = cmd.right = 0;		
 		}
-		else if(id % 5 >= 2)
+		else 
 		{
-			cmd.left = cmd.right = 0;		
+			if(id % 5 >= 1)
+				cmd.left = cmd.right = 0;		
 		}
-		else
-		{
-			cmd = acertar_angulo(act, obj);
-		}
-
 	}
 
 	return cmd;
