@@ -91,7 +91,36 @@ void Strategy::calc_strategy(){
 	final_atacante.x = min(max((double) final_atacante.x, 15.0), 135.0);
 	final_atacante.y = min(max((double) final_atacante.y, 6.0), 124.0);
 
-	commands[0] = travel_to(state.robots[3].pose, final_atacante);
+	/*commands[0] = travel_to(state.robots[3].pose, final_atacante);
+	commands[1] = circ_arc(state.robots[4].pose, final_atacante);
+
+
+	if(distancePoint(state.robots[3].pose, state.ball) > 10)
+		indo_pro_gol = 0;
+
+	if(distancePoint(state.robots[3].pose, final_atacante) < 5 || indo_pro_gol)
+	{
+		commands[0].left = commands[0].right = 0;
+		commands[0] = travel_to(state.robots[3].pose, state.ball);
+		indo_pro_gol = 1;
+	}
+	
+	btVector3 final_goleiro(17, max(47.0, min(83.0, (double) futuro(state.ball).y)));
+	if(id % 10 == 0 && distancePoint(final_goleiro, state.robots[5].pose) > 3)
+		commands[2] = circ_arc(state.robots[5].pose, final_goleiro);
+	else if(id % 10 > 6)
+		commands[2].left = commands[2].right = 0;
+
+	*/
+
+	//Estratégia do brocolis
+	
+	//Robo 1: atacante
+
+	/*if(state.robots[3].pose.x > state.ball.x){
+		//final_atacante.x = min(max((double) final_atacante.x - 15.0, 15.0), 135.0);
+		final_atacante.x = state.robots[3].pose.x - 15.0;
+	}*/
 
 	if(distancePoint(state.robots[3].pose, state.ball) > 10)
 		indo_pro_gol = 0;
@@ -103,13 +132,26 @@ void Strategy::calc_strategy(){
 		indo_pro_gol = 1;
 	}
 
+	if(distancePoint(state.robots[3].pose, final_atacante) < 25){
+		commands[0] = travel_to(state.robots[3].pose, final_atacante);
+	}
+	else{
+		commands[0] = circ_arc(state.robots[3].pose, final_atacante);
+	}
 
+	//Robo 2: zaga
+	btVector3 final_zaga(60, max(10.0, min(120.0, (double) futuro(state.ball).y)));
+	if(id % 10 == 0 && distancePoint(final_zaga, state.robots[5].pose) > 3)
+		commands[1] = circ_arc(state.robots[4].pose, final_zaga);
+	else if(id % 10 > 6)
+		commands[1].left = commands[1].right = 0;
+
+	//Robo 3: goleiro
 	btVector3 final_goleiro(17, max(47.0, min(83.0, (double) futuro(state.ball).y)));
 	if(id % 10 == 0 && distancePoint(final_goleiro, state.robots[5].pose) > 3)
 		commands[2] = circ_arc(state.robots[5].pose, final_goleiro);
 	else if(id % 10 > 6)
 		commands[2].left = commands[2].right = 0;
-
 
 	
 /*	btVector3 obj(85,65, atan2(state.ball.y - state.robots[3].pose.y, state.ball.x - state.robots[3].pose.x) * 180.0 / M_PI + 180);
