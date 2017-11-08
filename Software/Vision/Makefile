@@ -7,7 +7,7 @@
 #
 
 
-CCX = g++ -std=c++11
+CCX = g++ -std=c++11 -O3
 DEBUG_FLAG = -g
 
 

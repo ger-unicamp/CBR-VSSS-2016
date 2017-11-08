@@ -41,8 +41,6 @@ int main(int argc, char* argv[])
 
 	color_range secondary_color[3] = {green, purple, red}; // define secondary colors
 
-	bool unset = false;
-
 	bool play = false;
 
 	while (1)
