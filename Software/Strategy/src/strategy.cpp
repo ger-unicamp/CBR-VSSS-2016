@@ -139,24 +139,72 @@ void Strategy::calc_strategy(){
 
 	if(distancePoint(state.robots[3].pose, final_atacante) < 5 || indo_pro_gol)
 	{
-		commands[0] = travel_to(state.robots[3].pose, state.ball);
+		btVector3 tmp = state.ball;
+		tmp.x = max((double) tmp.x, 30.0);
+		commands[0] = travel_to(state.robots[3].pose, tmp);
 		indo_pro_gol = 1;
 	}
 
 	//Robo 2: zaga
-	btVector3 final_zaga(60, max(10.0, min(120.0, (double) futuro(state.ball).y)));
-	if(id % 10 == 0 && distancePoint(final_zaga, state.robots[4].pose) > 3)
+	btVector3 final_zaga(50, max(15.0, min(115.0, (double) futuro(state.ball).y)));
+	if(id % 10 == 0)
+	{
+		if(distancePoint(final_zaga, state.robots[5].pose) > 3)
+			commands[2] = circ_arc(state.robots[5].pose, final_zaga);
+		else
+		{
+			if(state.ball.y < state.robots[5].pose.y)
+			{
+				commands[2].left = 40;
+				commands[2].right = -40;
+			}
+			else
+			{
+				commands[2].left = -40;
+				commands[2].right = 40;
+			}
+		}
+
+	}
+	else if(id % 10 > 6)
+		commands[2].left = commands[2].right = 0;
+
+/*	if(id % 10 == 0 && distancePoint(final_zaga, state.robots[4].pose) > 3)
 		commands[1] = circ_arc(state.robots[4].pose, final_zaga);
 	else if(id % 10 > 6)
 		commands[1].left = commands[1].right = 0;
-
+*/
 	//Robo 3: goleiro
+
+	btVector3 final_goleiro(17, max(47.0, min(83.0, (double) futuro(state.ball).y)));
+	if(id % 10 == 0)
+	{
+		if(distancePoint(final_goleiro, state.robots[4].pose) > 3)
+			commands[1] = circ_arc(state.robots[4].pose, final_goleiro);
+		else
+		{
+			if(state.ball.y < state.robots[4].pose.y)
+			{
+				commands[1].left = 40;
+				commands[1].right = -40;
+			}
+			else
+			{
+				commands[1].left = -40;
+				commands[1].right = 40;
+			}
+		}
+
+	}
+	else if(id % 10 > 6)
+		commands[1].left = commands[1].right = 0;
+	/*
 	btVector3 final_goleiro(17, max(47.0, min(83.0, (double) futuro(state.ball).y)));
 	if(id % 10 == 0 && distancePoint(final_goleiro, state.robots[5].pose) > 3)
 		commands[2] = circ_arc(state.robots[5].pose, final_goleiro);
 	else if(id % 10 > 6)
 		commands[2].left = commands[2].right = 0;
-
+	*/
 
 	//Robo 3: goleiro vai goleirar
 	//Se estiver no eixo do gol
@@ -265,15 +313,11 @@ void Strategy::calc_strategy(){
 	id++;
 	printf("***** %d\n", id++);
 
-	if(state.ball.x + state.ball.y == 0)
-	{
-		commands[1].left = commands[1].right = commands[2].left = commands[2].right = commands[0].left = commands[0].right = 0;
-		printf("Ball lost\n");
-	}
 
 	if(state.robots[3].pose.x + state.robots[3].pose.y == 0)
 	{
-		commands[0].left = commands[0].right = 0;
+		commands[0].left = 40;
+		commands[0].right = -40;
 		printf("Robot 0 lost\n");
 	}
 
@@ -287,6 +331,12 @@ void Strategy::calc_strategy(){
 	{
 		commands[2].left = commands[2].right = 0;
 		printf("Robot 2 lost\n");
+	}
+
+	if(state.ball.x + state.ball.y == 0)
+	{
+		commands[1].left = commands[1].right = commands[2].left = commands[2].right = commands[0].left = commands[0].right = 0;
+		printf("Ball lost\n");
 	}
 
 	state.ball.show();
