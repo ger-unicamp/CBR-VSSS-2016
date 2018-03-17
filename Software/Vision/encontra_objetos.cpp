@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
 			 break;
 		}
 
-		set_border_manually(frame, Point2f(13, 29), Point2f(591, 10), Point2f(610, 480), Point2f(3, 475));
+		set_border_manually(frame, Point2f(94, 50), Point2f(538, 65), Point2f(522, 468), Point2f(75, 436));
 		Mat transformed_frame = transform(frame);
 	
 		// Nosso gol sempre será o lado esquerdo da tela
