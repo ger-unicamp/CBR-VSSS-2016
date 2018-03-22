@@ -29,15 +29,6 @@ void configura_velocidade (int motor_a, int motor_b)
 	}
 }
 
-//Configura o valor para cada motor, segundo http://migre.me/wosaU
-void configura_motores (int in_1, int in_2, int in_3, int in_4)
-{
-	digitalWrite(PH_IN1, in_1);
-	digitalWrite(PH_IN2, in_2);
-	digitalWrite(PH_IN3, in_3);
-	digitalWrite(PH_IN4, in_4);
-}
-
 void setup()
 {
 	pinMode(PH_IN1, OUTPUT);
