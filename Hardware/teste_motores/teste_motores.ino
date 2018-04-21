@@ -68,7 +68,7 @@ void setup(){
 }
 
 void loop(){
-  configura_velocidade(200,200);
+  configura_velocidade(40, 40);
   
   /*for(int i=0; i<256; i++)
   {

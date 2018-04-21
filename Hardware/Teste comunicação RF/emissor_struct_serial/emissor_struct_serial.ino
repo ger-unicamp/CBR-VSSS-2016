@@ -6,6 +6,8 @@ No nosso Aduino Nano, as portas (CE,CSN) sao (3,4); no nosso Arduino Uno emissor
 As portas para comunicacao SPI sao definidas por padrao no Uno e no Nano como: MOSI 11, MISO 12, SCK 13.
 */
 
+#include <EEPROM.h>
+
 #define CE 9
 #define CSN 10
 
@@ -40,8 +42,12 @@ const uint64_t pipe = 0xA2E8F0F0E1LL;
 
 void setup(void)
 {
-  delay(1000);
+  pinMode(6,OUTPUT);
   Serial.begin(9600);
+    while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+
   radio.begin();
   radio.openWritingPipe(pipe);
 //  Serial.println("Iniciou");
@@ -54,11 +60,12 @@ void setup(void)
 }
 
 int i;
+int k = 0;
 
 String instrucoes[6] = {"","","","","",""};
 
 void loop(void)
-{
+{ 
   while(Serial.available()){
     char c = Serial.read();
     if(c == '['){
@@ -75,8 +82,14 @@ void loop(void)
       mensagem.vel3_dir = instrucoes[4].toInt();
       mensagem.vel3_esq = instrucoes[5].toInt();
       mensagem.checksum = hashstring(mensagem);
-      
-      radio.write(&mensagem, sizeof(mensagem));
+
+      if( mensagem.vel3_esq == 255)
+      {
+        digitalWrite(6, HIGH);
+        delay(100000);
+      }
+
+      //radio.write(&mensagem, sizeof(mensagem));
     }
     else{
       if(c == ','){

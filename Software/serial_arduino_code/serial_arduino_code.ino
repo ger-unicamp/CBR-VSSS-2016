@@ -1,6 +1,7 @@
 void setup()
 {
     Serial.begin(9600);
+    pinMode(13,OUTPUT);
 }
 
 int input,num;
@@ -23,6 +24,7 @@ void loop()
 {
     if(Serial.available()>0)
     {
+        digitalWrite(13,HIGH);
         input=Serial.read();
  
         if(input==',')
@@ -36,5 +38,9 @@ void loop()
             j++;
             buff[j]=input;
         }
+    }
+    else
+    {
+      //digitalWrite(13,LOW);  
     }
 }
