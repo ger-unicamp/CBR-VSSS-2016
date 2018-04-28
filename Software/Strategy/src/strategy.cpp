@@ -35,6 +35,8 @@ void Strategy::init(string main_color, bool is_debug, bool real_environment, str
 
 
 void Strategy::loop(){
+	int flag_tempo = 0;
+
 	SerialSender *sender;
 	if(real_environment){
 		sender = new SerialSender();
@@ -54,7 +56,8 @@ void Strategy::loop(){
 		gettimeofday(&t1,NULL);
 		real_time_1 = (t1.tv_sec - t0.tv_sec)*1000.0; //s para ms
 		real_time_1 += (t1.tv_usec - t0.tv_usec)/1000.0; //us para ms
-		printf("Delay estrategia 1: %.5f\n", real_time_1);
+		if(flag_tempo)
+			printf("Delay estrategia 1: %.5f\n", real_time_1);
 
 		
 		if(!real_environment){
@@ -64,9 +67,11 @@ void Strategy::loop(){
 		}else{
 			gettimeofday(&t2,NULL);
 
-			for(int k=255; k<256; k++)
+			//TESTE DE ATRASO ==================================================================================
+			sleep(3);
+			for(int k=0; k>=0; k++)
 			{
-				sender->send(commands[0].right, commands[0].left, commands[1].right, commands[1].left, commands[2].right, k);
+				sender->send(255, 255, commands[1].right, commands[1].left, commands[2].right, commands[2].left);
 				fflush(stdout);
 				usleep(30000);
 			}
@@ -76,7 +81,8 @@ void Strategy::loop(){
 			gettimeofday(&t3,NULL);
 			real_time_3 = (t3.tv_sec - t2.tv_sec)*1000.0; //s para ms
 			real_time_3 += (t3.tv_usec - t2.tv_usec)/1000.0; //us para ms
-			printf("Delay estrategia 2: %.5f\n", real_time_3);
+			if(flag_tempo)
+				printf("Delay estrategia 2: %.5f\n", real_time_3);
 
 			// Put your transmission code here
 		}

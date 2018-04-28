@@ -11,6 +11,8 @@
 #include "ger_vsss.hpp"
 #include "strategy_interface.h"
 
+
+int flag_tempo = 0;	// flag que habilita impressao de delays na tela
 long contador = 0;
 
 struct timeval t0, t1, t2, t3, t4, t5, t6, t7, t8, t9;
@@ -145,9 +147,9 @@ int main(int argc, char* argv[])
 
 	        circle(transformed_frame, primary_circles[i].center, 4, Scalar(255, 255, 255), -1);
 	        line(transformed_frame, primary_circles[i].center, primary_circles[i].center + 2*(secondary_circles[type][index].center - primary_circles[i].center), Scalar(255, 255, 255), 2);
-			//printf("\nx_robo%d=%.1f, y_robo%d=%.1f\n", type, primary_circles[i].center.x, type, primary_circles[i].center.y);
-			//printf("robo%d_dir: %.1lf %.1lf\n", type, secondary_circles[type][index].center.x - primary_circles[i].center.x, secondary_circles[type][index].center.y - primary_circles[i].center.y);
-			//printf("robo%d_dir: %.1lf\n", type, (M_PI + atan2(secondary_circles[type][index].center.y - primary_circles[i].center.y, secondary_circles[type][index].center.x - primary_circles[i].center.x)) * (180/M_PI));
+			printf("\nx_robo%d=%.1f, y_robo%d=%.1f\n", type, primary_circles[i].center.x, type, primary_circles[i].center.y);
+			printf("robo%d_dir: %.1lf %.1lf\n", type, secondary_circles[type][index].center.x - primary_circles[i].center.x, secondary_circles[type][index].center.y - primary_circles[i].center.y);
+			printf("robo%d_dir: %.1lf\n", type, (M_PI + atan2(secondary_circles[type][index].center.y - primary_circles[i].center.y, secondary_circles[type][index].center.x - primary_circles[i].center.x)) * (180/M_PI));
 		}
 
 		sort(opponent_circles.begin(), opponent_circles.end());
@@ -165,7 +167,7 @@ int main(int argc, char* argv[])
 			}
 
 	        circle(transformed_frame, opponent_circles[i].center, 4, Scalar(255, 255, 255), -1);
-			//printf("\nx_opponent%d=%.1f, y_opponent%d=%.1f\n", i, opponent_circles[i].center.x, i, opponent_circles[i].center.y);
+			printf("\nx_opponent%d=%.1f, y_opponent%d=%.1f\n", i, opponent_circles[i].center.x, i, opponent_circles[i].center.y);
 		}
 
 		gettimeofday(&t5,NULL);
@@ -177,7 +179,7 @@ int main(int argc, char* argv[])
 		{
 	        circle(transformed_frame, ball_circles[0].center, 4, Scalar(255, 255, 255), -1);
 			fieldState.ball_pos = Point2f((150.0 * ball_circles[0].center.x / dWidth), (130.0 * ball_circles[0].center.y / dHeight));
-			//printf("\nx_ball=%.1f, y_ball=%.1f\n", ball_circles[0].center.x, ball_circles[0].center.y);
+			printf("\nx_ball=%.1f, y_ball=%.1f\n", ball_circles[0].center.x, ball_circles[0].center.y);
 		}
 
 		if(play == false) // pretends the ball is not there so players will stop
@@ -186,7 +188,8 @@ int main(int argc, char* argv[])
 		gettimeofday(&t9,NULL);
 		real_time_9 = (t9.tv_sec)*1000.0; //s para ms
 		real_time_9 += (t9.tv_usec)/1000.0; //us para ms
-		printf("Envio: %f ms\n", real_time_9);
+		if(flag_tempo)
+			printf("Envio: %f ms\n", real_time_9);
 		// sends data to the strategy code
 		interface.sendToStrategy(fieldState);
 
@@ -194,9 +197,10 @@ int main(int argc, char* argv[])
 		real_time_6 = (t6.tv_sec - t5.tv_sec)*1000.0; //s para ms
 		real_time_6 += (t6.tv_usec - t5.tv_usec)/1000.0; //us para ms
 		
-		//printf("Real time: %0.3f ms %0.3f ms %0.3f ms %0.3f ms %0.3f ms %0.3f ms TOTAL: %0.3f ms\n", 
-		//	real_time_1, real_time_2, real_time_3, real_time_4, real_time_5, real_time_6, 
-		//	real_time_1+real_time_2+real_time_3+real_time_4+real_time_5+real_time_6);
+		if(flag_tempo)
+			printf("Real time: %0.3f ms %0.3f ms %0.3f ms %0.3f ms %0.3f ms %0.3f ms TOTAL: %0.3f ms\n", 
+				real_time_1, real_time_2, real_time_3, real_time_4, real_time_5, real_time_6, 
+				real_time_1+real_time_2+real_time_3+real_time_4+real_time_5+real_time_6);
 
 		imshow("MyVideo_transformed", transformed_frame); //show the frame in "MyVideo_transformed" window
 
@@ -205,9 +209,11 @@ int main(int argc, char* argv[])
 		real_time_8 = (t8.tv_sec - t7.tv_sec)*1000.0; //s para ms
 		real_time_8 += (t8.tv_usec - t7.tv_usec)/1000.0; //us para ms
 		if(real_time_8 > 1000.0){
-			//printf("%ld frames/segundo\n", contador);
-			contador = 0;
-			gettimeofday(&t7,NULL);
+			if(flag_tempo){
+				printf("%ld frames/segundo\n", contador);
+				contador = 0;
+				gettimeofday(&t7,NULL);
+			}
 		}
 
 		int keypress = waitKey(1);
